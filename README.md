@@ -148,29 +148,30 @@ The server starts at **http://localhost:3000** with an in-memory MongoDB — zer
 ---
 
 ## 🏆 Problem Statement Milestones
+For a detailed technical breakdown of our trust architecture, see [MILESTONES_SOLUTION.md](MILESTONES_SOLUTION.md).
 
 ### Milestone 1: Personal Identity Claim Verification
-**Solution**: Risk-based scoring engine that checks claimed names against high-profile patterns (CEOs, public figures, political names). Names scoring >70/100 require manual review with document upload. Normal names are auto-approved.
+**Solution**: Risk-based scoring engine that checks claimed names against high-profile patterns. Impersonation detection triggers mandatory administrative review with professional document verification.
 
 ### Milestone 2: Company Ownership Claim Verification
-**Solution**: Domain email matching — if the user's email domain matches the company website domain, ownership is auto-approved. Non-matching domains trigger manual review requiring business documents.
+**Solution**: Domain-email sign-off paired with business document validation. Companies are invisible to the public until ownership is verified by an Admin.
 
 ### Milestone 3: Event Authenticity & Post-Payment Trust
-**Solution**: Escrow payment model where ticket payments are held until event completion. Organizer trust score affected by cancellations (-15 points). Fraud reporting system auto-flags events with 5+ reports.
+**Solution**: **SyncEscrow** payment architecture. Attendee funds are held by the platform until event completion. Mandatory admin moderation gates all new listings to prevent "fake" events.
 
 ### Milestone 4: Direct Owner-to-Investor Trust
-**Solution**: Only verified company owners can post investment opportunities. Investors see multi-layered trust indicators (owner verification, company verification, ownership proof, trust scores). Direct contact is established only when both parties are verified — no middleman possible.
+**Solution**: **Anti-Broker Shield**. Mapped authorized representatives and owner-only listing controls. Investors can view the "Trust Lineage" showing the verification chain from founder to business.
 
 ---
 
 ## 🧪 Test Coverage
 
-Run the comprehensive test suite:
+Run the comprehensive 71-point test suite:
 ```bash
 node tests/api-tests.js
 ```
 
-### 63 Tests Across 12 Categories
+### 71 Tests Across 13 Categories
 
 | Category | Tests | Coverage |
 |----------|-------|----------|
@@ -179,13 +180,14 @@ node tests/api-tests.js
 | Face Verification | 5 | Liveness, descriptors, duplicates, trust |
 | Identity Claims | 3 | Normal names, high-risk, risk scoring |
 | Company Verification | 6 | CRUD, domain match, ownership, manual review |
-| Events & Escrow | 5 | Create, register, escrow, duplicates, fraud |
+| Events & Escrow | 6 | Admin gating, register, escrow, fraud reports |
 | Experienced Jobs | 5 | Fresher rejection, CRUD, applications |
 | Feed & Networking | 7 | Posts, likes, comments, search, profiles |
 | Campaign Engine | 7 | Campaigns, coupons, multipliers, wallet |
 | B2B Exchange | 5 | Projects, proposals, milestones, ratings |
 | AI Assistance | 4 | Profile tips, campaign recs, suggestions |
-| Investment Trust | 4 | Seek funding, interest, trust indicators |
+| Investment Trust | 6 | Anti-broker limits, direct contact, lineage |
+| Admin Moderation | 5 | Approve/Reject workflows for all pillars |
 
 ### Test Strategy
 - **Functional flows**: Complete user journeys (register → verify → use features)

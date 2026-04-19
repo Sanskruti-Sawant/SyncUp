@@ -69,10 +69,17 @@ async function authRoutes(fastify, opts) {
   }, async (request, reply) => {
     const { email, password } = request.body;
     const user = await User.findOne({ email });
-    if (!user) return reply.code(401).send({ error: 'Invalid credentials' });
+    
+    if (!user) {
+      fastify.log.warn(`Login failed: User not found (${email})`);
+      return reply.code(401).send({ error: 'User not found. If you recently registered, please note the in-memory database resets when the server restarts.' });
+    }
 
     const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) return reply.code(401).send({ error: 'Invalid credentials' });
+    if (!valid) {
+      fastify.log.warn(`Login failed: Incorrect password for ${email}`);
+      return reply.code(401).send({ error: 'Incorrect password. Please check your credentials.' });
+    }
 
     const token = fastify.jwt.sign({ id: user._id, email: user.email }, { expiresIn: '7d' });
 

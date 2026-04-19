@@ -104,16 +104,22 @@
 
   <!-- EVENTS TAB -->
   <div id="tab-events" class="section-block" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <h2>Professional Events & Workshops</h2>
-      <button class="btn btn--gradient" onclick="document.getElementById('host-event-form').style.display='block'">+ Host Event</button>
+    
+    <!-- Prominent Host Event Call-To-Action -->
+    <div id="host-event-cta" class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(167,139,250,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(167,139,250,0.3); text-align: center; padding: 2.5rem;">
+      <div style="font-size: 3.5rem; color: #a78bfa; margin-bottom: 1rem;"><span class="material-symbols-outlined" style="font-size: 3.5rem;">event_available</span></div>
+      <h2 style="margin-bottom: 0.5rem;">Host a Professional Event</h2>
+      <p style="color: var(--on-surface-variant); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Connect with the SyncUp community. From hackathons to workshops, host events with **SyncEscrow** protection. Your payouts are secured and attendees are verified.
+      </p>
+      <button class="btn btn--gradient" style="font-size: 1.1rem; padding: 0.8rem 2.5rem;" onclick="document.getElementById('host-event-form').style.display='block'; document.getElementById('host-event-cta').style.display='none';">+ Create Event Listing</button>
     </div>
 
     <!-- Host Event Form -->
-    <div id="host-event-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid var(--primary);">
+    <div id="host-event-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid #a78bfa;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-        <h3>Host a New Event</h3>
-        <button class="btn btn--glass" onclick="document.getElementById('host-event-form').style.display='none'">Cancel</button>
+        <h3>Event Details & Escrow Config</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('host-event-form').style.display='none'; document.getElementById('host-event-cta').style.display='block';">Cancel</button>
       </div>
       <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
         <div class="form-group">
@@ -240,32 +246,62 @@
 
   <!-- PROFILE TAB -->
   <div id="tab-profile" class="section-block" style="display:none">
-    <h2>Edit Profile</h2>
-    <div class="dash-card glass-panel">
-      <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Headline</label><input class="form-input" id="profile-headline" placeholder="e.g. Senior Engineer at Google"/></div>
-      <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Bio</label><textarea class="post-input" id="profile-bio" placeholder="Tell professionals about yourself..." style="min-height:100px"></textarea></div>
-      <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Skills (comma-separated)</label><input class="form-input" id="profile-skills" placeholder="JavaScript, Leadership, Product"/></div>
-      <button class="btn btn--gradient" onclick="updateProfile()">Save Profile</button>
-    </div>
-
-    <h2 style="margin-top:2rem">Personal Identity Claim Verification</h2>
-    <div class="dash-card glass-panel" style="border-left: 4px solid var(--primary)">
-      <p style="font-size:0.9rem; color:var(--on-surface-variant); margin-bottom:1rem">
-        Claim your professional name. High-profile identities (e.g., CEOs, public figures) are flagged by our risk engine and require manual review with official document upload to prevent impersonation.
-      </p>
-      <div class="form-group" style="margin-bottom:1rem">
-        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Claimed Name</label>
-        <div style="display:flex; align-items:center; gap:1rem;">
-          <input class="form-input" id="identity-claim-name" placeholder="e.g. Elon Musk" oninput="debouncedRiskCheck()"/>
-          <span id="risk-badge" style="display:none; padding:.3rem .6rem; border-radius:.5rem; font-size:.8rem; font-weight:700"></span>
+    
+    <!-- Profile Header / Identity Status -->
+    <div class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(224,176,255,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(224,176,255,0.3); padding: 2.5rem; display: flex; align-items: center; gap: 2rem;">
+      <div style="width: 100px; height: 100px; background: var(--surface-highest); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary);">
+        <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">account_circle</span>
+      </div>
+      <div style="flex: 1;">
+        <h1 id="welcome-name" style="margin-bottom: 0.5rem; font-size: 2.2rem;" class="gradient-text">Welcome</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <span id="verify-badge" class="dash-badge">Checking status...</span>
+          <span id="trust-badge" class="dash-badge verified" style="background: rgba(0,210,133,0.1); color: #00d285;">Trust: --</span>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:1.5rem" id="identity-doc-group" style="display:none">
-        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Supporting Document (Required for high-risk claims)</label>
-        <input type="file" class="form-input" id="identity-claim-doc" style="padding:0.5rem"/>
+    </div>
+
+    <div class="dash-grid" style="grid-template-columns: 2fr 1.2fr; gap: 2rem; align-items: start;">
+      
+      <!-- Edit Profile Section -->
+      <div class="dash-card glass-panel" style="border-top: 4px solid var(--primary);">
+        <h3 style="margin-bottom: 1.5rem;">Professional Information</h3>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Professional Headline</label>
+          <input class="form-input" id="profile-headline" placeholder="e.g. Senior Engineer at Google"/>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Bio / Career Summary</label>
+          <textarea class="post-input" id="profile-bio" placeholder="Tell professionals about yourself..." style="min-height:120px"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem">
+          <label class="form-label">Skills (comma-separated)</label>
+          <input class="form-input" id="profile-skills" placeholder="JavaScript, Leadership, Product"/>
+        </div>
+        <button class="btn btn--gradient btn--lg" onclick="updateProfile()">Save Changes</button>
       </div>
-      <button class="btn btn--gradient" onclick="submitIdentityClaim()">Submit Identity Claim</button>
-      <div id="identity-claim-result" style="margin-top:1rem;font-size:0.9rem;font-weight:600"></div>
+
+      <!-- Identity Verification Section -->
+      <div class="dash-card glass-panel" style="border-top: 4px solid #4ade80;">
+        <h3 style="margin-bottom: 1rem; color: #4ade80;">Identity Verification</h3>
+        <p style="font-size:0.85rem; color:var(--on-surface-variant); margin-bottom:1.5rem">
+          Verify your professional name to unlock high-trust features. Impersonation detection is active.
+        </p>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Claimed Name</label>
+          <div style="display:flex; flex-direction: column; gap:0.5rem;">
+            <input class="form-input" id="identity-claim-name" placeholder="e.g. Elon Musk" oninput="debouncedRiskCheck()"/>
+            <span id="risk-badge" style="display:none; padding:.3rem .6rem; border-radius:.5rem; font-size:.7rem; font-weight:700; align-self: flex-start;"></span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem" id="identity-doc-group">
+          <label class="form-label">Supporting Document (PDF/Image)</label>
+          <input type="file" class="form-input" id="identity-claim-doc" style="padding:0.5rem"/>
+        </div>
+        <button class="btn btn--glass btn--full" onclick="submitIdentityClaim()" style="color: #4ade80; border-color: rgba(74,222,128,0.3);">Submit Verification</button>
+        <div id="identity-claim-result" style="margin-top:1rem;font-size:0.8rem;font-weight:600"></div>
+      </div>
+
     </div>
   </div>
 
@@ -280,9 +316,68 @@
 
   <!-- INVESTMENTS TAB -->
   <div id="tab-opportunities" class="section-block" style="display:none">
-    <h2>Investment Opportunities</h2>
-    <p style="color:var(--on-surface-variant);margin-bottom:1.5rem">Direct owner-to-investor trust. No middlemen.</p>
+    
+    <!-- Prominent Investment Call-To-Action -->
+    <div id="list-investment-cta" class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(251,191,36,0.3); text-align: center; padding: 2.5rem;">
+      <div style="font-size: 3.5rem; color: #fbbf24; margin-bottom: 1rem;"><span class="material-symbols-outlined" style="font-size: 3.5rem;">monetization_on</span></div>
+      <h2 style="margin-bottom: 0.5rem;">Secure Funding for Your Vision</h2>
+      <p style="color: var(--on-surface-variant); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Access direct owner-to-investor capital. Skip the brokers and middlemen. Verified founders get direct exposure to our network of accredited investors.
+      </p>
+      <button class="btn btn--gradient" style="font-size: 1.1rem; padding: 0.8rem 2.5rem;" onclick="showInvestmentListingForm(); document.getElementById('list-investment-cta').style.display='none';">+ List for Investment</button>
+    </div>
+
+    <!-- List for Investment Form -->
+    <div id="list-investment-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid #fbbf24;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3>Raise Capital for Your Company</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('list-investment-form').style.display='none'; document.getElementById('list-investment-cta').style.display='block';">Cancel</button>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Select Company</label>
+          <select class="form-input" id="invest-company-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seeking Amount (₹)</label>
+          <input class="form-input" type="number" id="invest-amount" placeholder="e.g. 5000000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Equity Offered (%)</label>
+          <input class="form-input" type="number" id="invest-equity" placeholder="e.g. 10" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sector</label>
+          <input class="form-input" id="invest-sector" placeholder="e.g. FinTech" />
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Investment Description</label>
+          <textarea class="post-input" id="invest-desc" placeholder="Briefly describe your growth plan..." style="min-height:80px"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem; display:flex; gap:1rem; align-items:center;">
+        <button class="btn btn--gradient" onclick="postInvestment()">Post Opportunity</button>
+        <p style="font-size:0.8rem; color:var(--on-surface-variant)">Only verified owners can list. High-value deals undergo escalation review.</p>
+      </div>
+    </div>
+
+    <!-- Manage My Investments Section -->
+    <div id="my-investments-section" style="margin-bottom: 2rem; display:none;">
+      <h3 style="margin-bottom:1rem">Your Active Fundraises</h3>
+      <div id="my-investments-list" class="dash-grid"></div>
+    </div>
+
+    <h3 style="margin-bottom:1rem">Explore Opportunities</h3>
     <div id="investments-list" class="dash-grid"></div>
+  </div>
+
+  <!-- Trust Lineage Modal (Simplified) -->
+  <div id="trust-modal" class="glass-panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1000; width:90%; max-width:500px; padding:2rem; box-shadow: 0 0 100px rgba(0,0,0,0.8);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <h3 id="trust-modal-title">Investment Trust Lineage</h3>
+      <button class="btn btn--glass" onclick="document.getElementById('trust-modal').style.display='none'">Close</button>
+    </div>
+    <div id="trust-modal-content"></div>
   </div>
 
   <!-- AI TIPS TAB -->
@@ -397,7 +492,7 @@ function switchTab(tab) {
   if (tab === 'events') { loadEvents(); loadMyHostedEvents(); }
   if (tab === 'companies') loadCompanies();
   if (tab === 'b2b') loadB2B();
-  if (tab === 'opportunities') loadInvestments();
+  if (tab === 'opportunities') { loadInvestments(); loadMyOpportunities(); }
   if (tab === 'ai') loadAI();
   if (tab === 'admin') { loadAdminClaims(); loadAdminCompanyClaims(); loadAdminPendingEvents(); }
 }
@@ -933,6 +1028,69 @@ async function loadB2B() {
     : projects.map(p => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">handshake</span></div><div class="dash-card__title">${p.title}</div></div><div class="dash-card__body"><p>Budget: <b>₹${p.budget.toLocaleString()}</b></p><p style="margin-top:.5rem">${(p.description||'').slice(0,120)}...</p><button class="btn btn--glass" style="margin-top:1rem" onclick="alert('Proposal flow initialized')">Submit Proposal</button></div></div>`).join('');
 }
 
+async function showInvestmentListingForm() {
+  const res = await fetch(API + '/companies', { headers });
+  const { companies } = await res.json();
+  const verifiedCompanies = companies.filter(c => c.isVerified);
+  
+  if (verifiedCompanies.length === 0) {
+    return alert('You must have a verified company to list for investment.');
+  }
+
+  document.getElementById('list-investment-form').style.display = 'block';
+  document.getElementById('invest-company-select').innerHTML = verifiedCompanies.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+}
+
+async function postInvestment() {
+  const companyId = document.getElementById('invest-company-select').value;
+  const seekingAmount = document.getElementById('invest-amount').value;
+  const equityOffered = document.getElementById('invest-equity').value;
+  const sector = document.getElementById('invest-sector').value;
+  const description = document.getElementById('invest-desc').value.trim();
+
+  if (!seekingAmount || !equityOffered) return alert('Amount and Equity are required');
+
+  const res = await fetch(API + '/investment/seek', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ companyId, seekingAmount, equityOffered, sector, description })
+  });
+
+  if (res.ok) {
+    alert('Investment opportunity listed!');
+    document.getElementById('list-investment-form').style.display = 'none';
+    loadInvestments();
+    loadMyOpportunities();
+  } else {
+    const data = await res.json();
+    alert('Error: ' + data.error);
+  }
+}
+
+async function loadMyOpportunities() {
+  const res = await fetch(API + '/investment/my-opportunities', { headers });
+  const { opportunities } = await res.json();
+  if (opportunities && opportunities.length > 0) {
+    document.getElementById('my-investments-section').style.display = 'block';
+    document.getElementById('my-investments-list').innerHTML = opportunities.map(o => `
+      <div class="dash-card glass-panel" style="border-left: 4px solid #fbbf24">
+        <div class="dash-card__header">
+          <div class="dash-card__title">${o.name}</div>
+          <span class="dash-badge ${o.escalationLevel === 'none' ? 'verified' : 'pending'}">${o.escalationLevel}</span>
+        </div>
+        <div class="dash-card__body">
+          <p>Raising: <b>₹${(o.investmentDetails?.seekingAmount||0).toLocaleString()}</b> for <b>${o.investmentDetails?.equityOffered}%</b></p>
+          <div style="margin-top:1rem; display:flex; gap:0.5rem">
+            <button class="btn btn--glass" style="font-size:0.8rem" onclick="alert('Manage representatives flow')">Add Rep</button>
+            <button class="btn btn--glass" style="font-size:0.8rem" onclick="alert('View interests flow')">Interests (${o.investorInterests?.length||0})</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('my-investments-section').style.display = 'none';
+  }
+}
+
 async function loadInvestments() {
   const res = await fetch(API + '/investment/opportunities', { headers });
   const { opportunities } = await res.json();
@@ -940,8 +1098,92 @@ async function loadInvestments() {
     ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No active investment opportunities.</p></div>'
     : opportunities.map(o => {
         const d = o.investmentDetails || {};
-        return `<div class="dash-card glass-panel" style="border: 1px solid rgba(255,215,0,0.2)"><div class="dash-card__header"><div class="dash-card__icon" style="color:gold"><span class="material-symbols-outlined">attach_money</span></div><div class="dash-card__title">${o.name} <span style="color:#4ade80">✓</span></div></div><div class="dash-card__body"><p>Seeking: <b>₹${(d.seekingAmount||0).toLocaleString()}</b> for <b>${d.equityOffered||0}%</b> Equity</p><p style="margin-top:.5rem;color:var(--on-surface-variant);font-size:0.85rem">Direct Contact: ${o.owner?.name||'Verified Owner'}</p><p style="margin-top:.5rem">${(d.description||'').slice(0,120)}...</p><button class="btn btn--gradient" style="margin-top:1rem" onclick="alert('Direct connection request sent to owner')">Express Interest</button></div></div>`;
+        return `
+          <div class="dash-card glass-panel" style="border: 1px solid rgba(255,215,0,0.2)">
+            <div class="dash-card__header">
+              <div class="dash-card__icon" style="color:gold"><span class="material-symbols-outlined">attach_money</span></div>
+              <div class="dash-card__title">${o.name} <span style="color:#4ade80">✓</span></div>
+            </div>
+            <div class="dash-card__body">
+              <p>Seeking: <b>₹${(d.seekingAmount||0).toLocaleString()}</b> for <b>${d.equityOffered||0}%</b> Equity</p>
+              <div style="margin: 0.8rem 0; display:flex; gap:0.5rem; flex-wrap:wrap">
+                <span class="dash-badge verified" style="font-size:0.7rem">Founder Verified</span>
+                <span class="dash-badge verified" style="font-size:0.7rem">Anti-Broker Shield</span>
+              </div>
+              <p style="margin-top:.5rem;color:var(--on-surface-variant);font-size:0.85rem">Founder: ${o.owner?.name||'Verified Owner'}</p>
+              <p style="margin-top:.5rem">${(d.description||'').slice(0,100)}...</p>
+              <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                <button class="btn btn--gradient" style="flex:1" onclick="expressInvestmentInterest('${o._id}')">Express Interest</button>
+                <button class="btn btn--glass" onclick="showTrustLineage('${o._id}')"><span class="material-symbols-outlined">verified</span></button>
+              </div>
+            </div>
+          </div>`;
       }).join('');
+}
+
+async function showTrustLineage(id) {
+  const res = await fetch(API + '/investment/trust/' + id, { headers });
+  const data = await res.json();
+  const modal = document.getElementById('trust-modal');
+  const content = document.getElementById('trust-modal-content');
+  
+  modal.style.display = 'block';
+  content.innerHTML = `
+    <div style="margin-bottom:1.5rem">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem">
+        <div style="width:40px;height:40px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff"><span class="material-symbols-outlined">person</span></div>
+        <div>
+          <div style="font-weight:700">${data.lineage.verifiedOwner}</div>
+          <div style="font-size:0.8rem;color:var(--on-surface-variant)">Verified Company Owner</div>
+        </div>
+      </div>
+      <div style="padding-left:20px; border-left: 2px solid var(--primary); margin-left:19px; padding-bottom:1rem">
+        <div style="font-size:0.85rem; background:rgba(255,255,255,0.05); padding:0.8rem; border-radius:8px">
+          <p>✓ Identity Document Verified</p>
+          <p>✓ Business Registry Approved</p>
+          <p>✓ Domain Email Sign-off Confirmed</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:1rem; margin-top:0.5rem">
+        <div style="width:40px;height:40px;background:#4ade80;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000"><span class="material-symbols-outlined">domain</span></div>
+        <div>
+          <div style="font-weight:700">${data.companyName}</div>
+          <div style="font-size:0.8rem;color:var(--on-surface-variant)">Verified Entity (Trust Score: ${data.trustIndicators.companyTrustScore})</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.8rem; color:var(--on-surface-variant); border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem">
+      ${data.safeguards.map(s => `<p style="margin-bottom:0.4rem">• ${s}</p>`).join('')}
+    </div>
+  `;
+}
+
+async function expressInvestmentInterest(id) {
+  const amount = prompt('Amount you are looking to invest (₹):', '1000000');
+  if (!amount) return;
+  const message = prompt('Message to the founder:');
+  
+  const res = await fetch(API + '/investment/interest/' + id, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ amount, message })
+  });
+  
+  const data = await res.json();
+  if (res.ok) {
+    let contactInfo = '';
+    if (data.ownerContact) {
+      contactInfo = `\n\nDIRECT FOUNDER CONTACT UNLOCKED:\nName: ${data.ownerContact.name}\nLevel: ${data.ownerContact.verificationLevel}`;
+    }
+    alert(data.message + contactInfo);
+    
+    if (confirm('Direct connection established. Would you like to request an additional Direct-from-Domain Proof of Identity from the owner?')) {
+      await fetch(API + '/investment/interest/' + id + '/request-proof', { method: 'POST', headers });
+      alert('Proof request sent to founder.');
+    }
+  } else {
+    alert('Error: ' + data.error);
+  }
 }
 
 async function loadAI() {

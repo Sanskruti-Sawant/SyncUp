@@ -35,6 +35,12 @@ const companySchema = new mongoose.Schema({
 
   /* Investment (Milestone #4) */
   seekingInvestment: { type: Boolean, default: false },
+  escalationLevel: { type: String, enum: ['none', 'review-required', 'high-trust-verified'], default: 'none' },
+  authorizedRepresentatives: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    role: { type: String, default: 'Representative' },
+    verifiedAt: { type: Date, default: Date.now }
+  }],
   investmentDetails: {
     seekingAmount: Number,
     equityOffered: Number,
@@ -46,6 +52,7 @@ const companySchema = new mongoose.Schema({
     investor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     message: String,
     amount: Number,
+    proofRequested: { type: Boolean, default: false },
     status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
     createdAt: { type: Date, default: Date.now }
   }],

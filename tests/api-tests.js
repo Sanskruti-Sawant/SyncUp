@@ -326,23 +326,38 @@ function assert(name, condition, detail) {
   assert('AI networking suggestions', x.ok);
 
   /* ═══════════════════════════════════════════
-     MILESTONE 4: DIRECT OWNER-TO-INVESTOR TRUST
-     - Anti-middleman safeguards
-     - Owner-only investment posting
-     - Trust indicators
+     PILLAR 12: INVESTMENT TRUST & ANTI-MIDDLEMAN
+     MILESTONE 4: Direct Owner-to-Investor Trust
+     - Direct owner listing only
+     - Representative mapping
+     - Anti-broker safeguards
+     - Trust lineage tracking
      ═══════════════════════════════════════════ */
-  console.log('\n── 12. Investment Trust & Anti-Middleman (4 tests) ──');
+  console.log('\n── 12. Investment Trust & Anti-Middleman (6 tests) ──');
 
-  x = await req('POST', '/investment/seek', { companyId, seekingAmount: 1000000, equityOffered: 10, description: 'Seed round' }, demoToken);
-  assert('Post investment opportunity (owner-only)', x.ok);
+  // 1. Non-owner tries to post (fail)
+  x = await req('POST', '/investment/seek', { companyId, seekingAmount: 5000000, equityOffered: 5 }, token);
+  assert('Reject investment listing from non-owner/non-rep', x.status === 403);
 
+  // 2. Owner posts (success)
+  x = await req('POST', '/investment/seek', { companyId, seekingAmount: 5000000, equityOffered: 5, sector: 'Tech' }, demoToken);
+  assert('Verified owner posts investment opportunity', x.status === 200);
+
+  // 3. List opportunities
   x = await req('GET', '/investment/opportunities');
-  assert('List investment opportunities', x.ok);
+  assert('List investment opportunities', x.ok && x.opportunities?.length > 0);
 
-  x = await req('POST', '/investment/interest/' + companyId, { message: 'Interested in your company', amount: 500000 });
-  assert('Express investor interest (direct connection)', x.ok);
+  // 4. Express interest and get direct contact
+  x = await req('POST', '/investment/interest/' + companyId, { amount: 1000000, message: 'Interested' }, token);
+  assert('Express interest & Unlock direct founder contact', x.ok && x.ownerContact?.verified === true);
 
+  // 5. Request direct proof
+  x = await req('POST', '/investment/interest/' + companyId + '/request-proof', {}, token);
+  assert('Request direct domain-email proof from owner', x.ok);
+
+  // 6. Get Trust Lineage
   x = await req('GET', '/investment/trust/' + companyId);
+  assert('Retrieve full Trust Lineage (Founder -> Company)', x.ok && x.lineage?.verifiedOwner);
   assert('Trust indicators for due diligence', x.ok && x.trustIndicators && x.safeguards?.length > 0);
 
   /* ═══════════════════════════════════════════ */
