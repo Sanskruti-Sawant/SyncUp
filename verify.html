@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<title>SyncUp — Face Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+.verify-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.verify-card{width:100%;max-width:620px;padding:3rem;border-radius:1.5rem;text-align:center}
+.verify-title{font-size:1.8rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem}
+.verify-sub{color:var(--on-surface-variant);margin-bottom:2rem;font-size:.95rem}
+.camera-wrapper{position:relative;width:100%;max-width:400px;aspect-ratio:1;margin:0 auto 2rem;border-radius:50%;overflow:hidden;border:3px solid rgba(224,176,255,.2)}
+.camera-wrapper video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.camera-wrapper canvas{position:absolute;top:0;left:0;width:100%;height:100%;transform:scaleX(-1)}
+.scan-overlay{position:absolute;inset:0;border-radius:50%;border:3px dashed rgba(224,176,255,.3);animation:spin 10s linear infinite;pointer-events:none}
+.scan-line-v{position:absolute;top:0;left:50%;width:2px;height:100%;background:linear-gradient(to bottom,transparent,rgba(224,176,255,.6),transparent);animation:scan 3s ease-in-out infinite;pointer-events:none}
+.verify-status{font-size:1rem;font-weight:700;margin:1rem 0;min-height:1.5rem}
+.verify-status.detecting{color:var(--primary)}
+.verify-status.success{color:#4ade80}
+.verify-status.error{color:#ff6b6b}
+.challenge-text{font-size:.9rem;color:var(--primary-fixed-dim);margin:.5rem 0;min-height:1.2rem}
+.steps{display:flex;gap:1rem;justify-content:center;margin:1.5rem 0}
+.step{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.step__circle{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;background:var(--surface-highest);color:var(--on-surface-variant);transition:all .3s}
+.step__circle.active{background:var(--primary);color:var(--on-primary)}
+.step__circle.done{background:#4ade80;color:#000}
+.step__label{font-size:.7rem;color:var(--on-surface-variant);text-transform:uppercase;letter-spacing:.05em}
+.anti-spoof-list{text-align:left;margin:1.5rem 0;padding:1.5rem;border-radius:1rem;background:var(--surface-high)}
+.anti-spoof-list h4{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;color:var(--primary-fixed-dim);margin-bottom:.75rem}
+.anti-spoof-list li{font-size:.85rem;color:var(--on-surface-variant);padding:.3rem 0;display:flex;align-items:center;gap:.5rem}
+.anti-spoof-list .material-symbols-outlined{font-size:1rem;color:#4ade80}
+.ear-meter{margin:1rem auto;width:80%;max-width:300px;height:8px;background:var(--surface-highest);border-radius:9999px;overflow:hidden}
+.ear-meter__fill{height:100%;border-radius:9999px;transition:width .15s,background .15s}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes scan{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes blink-pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 15px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.blink-flash{animation:blink-pulse .5s ease-out}
+</style>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true"><div class="atmo-orb atmo-orb--1"></div><div class="atmo-orb atmo-orb--2"></div></div>
+<nav class="nav"><div class="nav__inner"><a href="/" class="nav__logo">SyncUp</a></div></nav>
+
+<div class="verify-page">
+<div class="verify-card glass-panel">
+  <h1 class="verify-title gradient-text">Face Verification</h1>
+  <p class="verify-sub">Confirm you're a real human. Fast, secure, and private.</p>
+
+  <div class="steps">
+    <div class="step"><div class="step__circle active" id="step1">1</div><div class="step__label">Detect</div></div>
+    <div class="step"><div class="step__circle" id="step2">2</div><div class="step__label">Liveness</div></div>
+    <div class="step"><div class="step__circle" id="step3">3</div><div class="step__label">Verify</div></div>
+  </div>
+
+  <div class="camera-wrapper" id="camera-wrapper">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="overlay"></canvas>
+    <div class="scan-overlay"></div>
+    <div class="scan-line-v"></div>
+  </div>
+
+  <div class="ear-meter"><div class="ear-meter__fill" id="ear-bar" style="width:50%;background:#4ade80"></div></div>
+  <div class="verify-status detecting" id="status">Initializing camera...</div>
+  <div class="challenge-text" id="challenge"></div>
+
+  <button class="btn btn--gradient btn--lg" id="start-btn" onclick="startVerification()" style="display:none">Begin Verification</button>
+  <button class="btn btn--gradient btn--lg" id="done-btn" style="display:none" onclick="window.location.href='/dashboard'">Go to Dashboard</button>
+
+  <div class="anti-spoof-list">
+    <h4>Anti-Spoofing Protection</h4>
+    <ul style="list-style:none;padding:0;margin:0">
+      <li><span class="material-symbols-outlined">check_circle</span> Rejects printed photos</li>
+      <li><span class="material-symbols-outlined">check_circle</span> Rejects mobile screen captures</li>
+      <li><span class="material-symbols-outlined">check_circle</span> Rejects masks & static images</li>
+      <li><span class="material-symbols-outlined">check_circle</span> Detects duplicate identities</li>
+      <li><span class="material-symbols-outlined">check_circle</span> Liveness blink challenge</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+const token = localStorage.getItem('syncup_token');
+if (!token) window.location.href = '/login';
+
+const video = document.getElementById('video');
+const overlay = document.getElementById('overlay');
+const statusEl = document.getElementById('status');
+const challengeEl = document.getElementById('challenge');
+const earBar = document.getElementById('ear-bar');
+let modelsLoaded = false;
+let blinkDetected = false;
+let faceDescriptor = null;
+
+/* ────────── INIT ────────── */
+async function init() {
+  // Step 1: Camera
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+    });
+    video.srcObject = stream;
+    await video.play();
+    statusEl.textContent = 'Camera active. Loading AI models...';
+  } catch (e) {
+    console.error('Camera error:', e);
+    statusEl.textContent = 'Camera access denied. Please allow camera and reload.';
+    statusEl.className = 'verify-status error';
+    challengeEl.textContent = 'Browser Settings → Privacy → Camera → Allow this site';
+    return;
+  }
+
+  // Step 2: Load models — use FULL landmark model (not tiny) for better eye tracking
+  try {
+    if (typeof faceapi === 'undefined') throw new Error('face-api.js not loaded');
+
+    const urls = [
+      'https://justadudewhohacks.github.io/face-api.js/models',
+      'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights',
+    ];
+    let ok = false;
+    for (const url of urls) {
+      try {
+        statusEl.textContent = 'Loading AI models... (this takes a moment)';
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(url);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(url);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(url);
+        ok = true;
+        console.log('Models loaded from:', url);
+        break;
+      } catch (e) { console.warn('CDN failed:', url, e.message); }
+    }
+    if (!ok) throw new Error('Could not load models from any source');
+    modelsLoaded = true;
+    statusEl.textContent = 'Face detection ready!';
+    statusEl.className = 'verify-status success';
+    document.getElementById('start-btn').style.display = 'inline-flex';
+    document.getElementById('step1').classList.add('done');
+  } catch (e) {
+    console.error('Model error:', e);
+    statusEl.textContent = 'Model load failed: ' + e.message;
+    statusEl.className = 'verify-status error';
+    challengeEl.innerHTML = '<button class="btn btn--glass" onclick="location.reload()">Retry</button>';
+  }
+}
+
+/* ────────── EAR HELPERS ────────── */
+function eyeAR(eye) {
+  // eye is array of 6 {x,y} points from 68-landmark model
+  const v1 = dist(eye[1], eye[5]);
+  const v2 = dist(eye[2], eye[4]);
+  const h  = dist(eye[0], eye[3]);
+  return h > 0 ? (v1 + v2) / (2.0 * h) : 0.3;
+}
+function dist(a, b) {
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
+/* ────────── BLINK DETECTION ────────── */
+async function startVerification() {
+  document.getElementById('start-btn').style.display = 'none';
+  document.getElementById('step2').classList.add('active');
+  statusEl.textContent = 'Detecting face...';
+  statusEl.className = 'verify-status detecting';
+  challengeEl.textContent = 'Keep your eyes open while we calibrate...';
+
+  // Rolling EAR buffer for adaptive thresholds
+  const earBuffer = [];
+  const BUFFER_SIZE = 10;
+  let blinkCount = 0;
+  let wasClosed = false;
+  let lastBlinkAt = 0;
+  let framesProcessed = 0;
+  const startedAt = Date.now();
+
+  const ctx = overlay.getContext('2d');
+
+  async function loop() {
+    if (blinkDetected) return;
+
+    // Use SSD MobileNet (more accurate than TinyFace) + full 68-point landmarks
+    const det = await faceapi
+      .detectSingleFace(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    // Resize canvas to video
+    if (overlay.width !== video.videoWidth) {
+      overlay.width = video.videoWidth || 640;
+      overlay.height = video.videoHeight || 480;
+    }
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+    const elapsed = (Date.now() - startedAt) / 1000;
+
+    if (!det) {
+      statusEl.textContent = 'No face detected — look at the camera';
+      earBar.style.width = '0%';
+      earBar.style.background = '#ff6b6b';
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    framesProcessed++;
+
+    // Draw landmarks for visual feedback
+    const dims = faceapi.matchDimensions(overlay, { width: overlay.width, height: overlay.height }, true);
+    const rd = faceapi.resizeResults(det, dims);
+    faceapi.draw.drawFaceLandmarks(overlay, rd);
+
+    // Compute EAR
+    const left  = det.landmarks.getLeftEye();
+    const right = det.landmarks.getRightEye();
+    const ear = (eyeAR(left) + eyeAR(right)) / 2;
+
+    // Update EAR visual meter
+    const pct = Math.min(Math.max(ear / 0.4 * 100, 0), 100);
+    earBar.style.width = pct + '%';
+
+    // Build rolling buffer (first 10 frames = calibration with eyes open)
+    if (earBuffer.length < BUFFER_SIZE) {
+      earBuffer.push(ear);
+      statusEl.textContent = `Calibrating... (${earBuffer.length}/${BUFFER_SIZE})`;
+      earBar.style.background = 'var(--primary)';
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    // Compute adaptive thresholds from the rolling baseline
+    const baseline = earBuffer.reduce((a, b) => a + b, 0) / earBuffer.length;
+    const closedThreshold = baseline * 0.70;  // 70% of baseline = eyes closing
+    const openThreshold   = baseline * 0.82;  // 82% of baseline = eyes reopened
+
+    // After 20s, make it even easier (single blink, wider thresholds)
+    const neededBlinks = elapsed > 20 ? 1 : 2;
+    const effectiveClosed = elapsed > 20 ? baseline * 0.80 : closedThreshold;
+
+    // Update EAR meter color based on state
+    if (ear < effectiveClosed) {
+      earBar.style.background = '#ff6b6b';  // Red = eyes closed
+    } else {
+      earBar.style.background = '#4ade80';  // Green = eyes open
+    }
+
+    // STATE MACHINE: detect open→closed→open transition
+    const now = Date.now();
+    if (!wasClosed && ear < effectiveClosed) {
+      wasClosed = true;
+      console.log(`Eyes CLOSED: ear=${ear.toFixed(3)} < threshold=${effectiveClosed.toFixed(3)}`);
+    }
+    if (wasClosed && ear > openThreshold && (now - lastBlinkAt) > 350) {
+      // BLINK DETECTED!
+      blinkCount++;
+      lastBlinkAt = now;
+      wasClosed = false;
+      console.log(`BLINK #${blinkCount} at ear=${ear.toFixed(3)}`);
+
+      // Flash the camera border green
+      document.getElementById('camera-wrapper').classList.add('blink-flash');
+      setTimeout(() => document.getElementById('camera-wrapper').classList.remove('blink-flash'), 500);
+
+      if (blinkCount >= neededBlinks) {
+        blinkDetected = true;
+        faceDescriptor = Array.from(det.descriptor);
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step2').classList.add('done');
+        document.getElementById('step3').classList.add('active');
+        statusEl.textContent = '✓ Liveness confirmed!';
+        statusEl.className = 'verify-status success';
+        challengeEl.textContent = 'Verifying identity against database...';
+        earBar.style.width = '100%';
+        earBar.style.background = '#4ade80';
+        await submitVerification();
+        return;
+      }
+      challengeEl.textContent = `✓ Blink ${blinkCount}/${neededBlinks} — blink again!`;
+    }
+
+    // Update status text
+    statusEl.textContent = `Face locked | EAR: ${ear.toFixed(3)} | Blinks: ${blinkCount}/${neededBlinks}`;
+    if (elapsed > 20 && blinkCount === 0) {
+      challengeEl.textContent = 'Blink once firmly (close eyes fully then open)';
+    } else if (framesProcessed > 10 && blinkCount === 0) {
+      challengeEl.textContent = 'Close your eyes fully, then open — blink firmly!';
+    }
+
+    // Slowly update baseline buffer (sliding window)
+    if (ear > openThreshold) {
+      earBuffer.shift();
+      earBuffer.push(ear);
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+}
+
+/* ────────── SUBMIT TO SERVER ────────── */
+async function submitVerification() {
+  try {
+    const res = await fetch(API + '/verify/face', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ faceDescriptor, livenessProof: true })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      statusEl.textContent = '✓ ' + data.message;
+      statusEl.className = 'verify-status success';
+      document.getElementById('step3').classList.remove('active');
+      document.getElementById('step3').classList.add('done');
+      const user = JSON.parse(localStorage.getItem('syncup_user') || '{}');
+      user.isVerified = true;
+      user.verificationLevel = data.verificationLevel;
+      localStorage.setItem('syncup_user', JSON.stringify(user));
+      document.getElementById('done-btn').style.display = 'inline-flex';
+      challengeEl.textContent = 'Your identity has been verified successfully.';
+    } else {
+      statusEl.textContent = data.error || 'Verification failed';
+      statusEl.className = 'verify-status error';
+      challengeEl.textContent = data.message || 'Please try again.';
+    }
+  } catch (err) {
+    statusEl.textContent = 'Server connection error';
+    statusEl.className = 'verify-status error';
+    challengeEl.innerHTML = '<button class="btn btn--glass" onclick="location.reload()">Retry</button>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

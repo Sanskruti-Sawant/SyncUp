@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SyncUp - The Synthetic Ether</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&amp;family=Manrope:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#c2c962",
+                        "primary-fixed-dim": "#e2b5ff",
+                        "on-tertiary-fixed-variant": "#464a00",
+                        "on-secondary-container": "#e299ff",
+                        "outline-variant": "#4c444f",
+                        "on-secondary-fixed": "#320047",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-on-surface": "#313030",
+                        "surface-variant": "#353534",
+                        "surface-container-highest": "#353534",
+                        "tertiary-fixed": "#e2ea7e",
+                        "outline": "#978e9a",
+                        "on-primary-fixed-variant": "#5d357a",
+                        "on-primary-fixed": "#2e014b",
+                        "on-primary": "#451d61",
+                        "error-container": "#93000a",
+                        "background": "#131313",
+                        "tertiary-fixed-dim": "#c6cd66",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-container": "#e0b0ff",
+                        "on-primary-container": "#673e83",
+                        "on-tertiary-fixed": "#1b1d00",
+                        "on-background": "#e5e2e1",
+                        "surface-bright": "#3a3939",
+                        "on-tertiary": "#303300",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#131313",
+                        "secondary-fixed": "#f8d8ff",
+                        "inverse-primary": "#764d93",
+                        "primary-fixed": "#f3daff",
+                        "secondary-fixed-dim": "#ebb2ff",
+                        "primary": "#f1d4ff",
+                        "on-surface-variant": "#cec3d0",
+                        "on-surface": "#e5e2e1",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary": "#dee57b",
+                        "on-secondary-fixed-variant": "#721199",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container": "#201f1f",
+                        "secondary-container": "#721199",
+                        "on-secondary": "#520071",
+                        "secondary": "#ebb2ff",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#e2b5ff",
+                        "on-tertiary-container": "#4f5400",
+                        "surface": "#131313",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            color: #e5e2e1;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(19, 19, 19, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-text {
+            text-shadow: 0 0 20px rgba(224, 176, 255, 0.4);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #f1d4ff, #e0b0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .atmospheric-shadow {
+            box-shadow: 0 20px 60px -10px rgba(114, 17, 153, 0.15);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative">
+<!-- Background Atmospheric Elements -->
+<div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-secondary-container/10 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-primary-container/5 blur-[150px]"></div>
+</div>
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-[#131313]/70 backdrop-blur-[30px] shadow-[0_40px_60px_-15px_rgba(114,17,153,0.08)]">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-8 h-20">
+<div class="text-2xl font-bold tracking-tighter text-[#f1d4ff] font-headline">SyncUp</div>
+<div class="hidden md:flex gap-8 items-center font-label tracking-tight">
+<a class="text-[#f1d4ff] font-bold border-b border-[#E0B0FF]/30 pb-1" href="#">Ecosystem</a>
+<a class="text-[#f1d4ff]/60 hover:text-[#E0B0FF] hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Features</a>
+<a class="text-[#f1d4ff]/60 hover:text-[#E0B0FF] hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Security</a>
+<a class="text-[#f1d4ff]/60 hover:text-[#E0B0FF] hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Pricing</a>
+</div>
+<button class="bg-primary text-on-primary font-bold py-2 px-6 rounded-full flex items-center gap-2 hover:bg-primary-container transition-colors">
+                Join Network
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative pt-40 pb-32 px-8 overflow-hidden">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="z-10 relative">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-primary-fixed-dim text-sm mb-8 font-label tracking-wide border-white/5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                    The Synthetic Ether is Live
+                </div>
+<h1 class="text-6xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] mb-6 font-headline">
+                    Join the Trusted <br/>
+<span class="gradient-text glow-text">Professional Ecosystem</span>
+</h1>
+<p class="text-lg text-on-surface-variant font-body mb-10 max-w-lg leading-relaxed">
+                    Step into a fluid, expansive digital cockpit where AI-driven trust meets human ingenuity. No bots. Pure identity.
+                </p>
+<div class="flex flex-wrap gap-4">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-4 px-10 rounded-full text-lg atmospheric-shadow hover:opacity-90 transition-opacity font-headline">
+                        Enter Ecosystem
+                    </button>
+<button class="glass-panel text-primary py-4 px-8 rounded-full text-lg font-headline hover:bg-white/5 transition-colors border border-white/10">
+                        Explore Protocols
+                    </button>
+</div>
+</div>
+<div class="relative h-[600px] w-full z-0 perspective-1000">
+<!-- Abstract 3D Visual Representation via styling -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-72 h-72 rounded-full bg-gradient-to-tr from-secondary-container to-primary opacity-20 blur-3xl absolute"></div>
+<img alt="Abstract 3D geometric composition with floating purple and black spheres in a dark ethereal void" class="w-full h-full object-cover rounded-3xl opacity-80 mix-blend-screen" data-alt="Abstract 3D geometric composition with floating purple and black spheres in a dark ethereal void" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn2s52rDOVOpb8eCtHE4HLb11I0r-hvuadhQH-lXkcusJUN10Z_2w2Zay3Q2TI7wTjKgoQPnjZ20sCzqfkCL7tn-twkii97PPvGi9nVekqAzDEXZpTQXK_MpdZd1jqs8S-jytjU7ieYBq-msjEqRWhNaz43ashOxX-bY9W-kkHJjhDJZS6wdn404IGpC3kIwSFTcPcWFHOPA3234k7gxHZuTzz-8PxzQqKxr8Yhi8eJWoQqjm9LJ_upPqqH3WMZsan8Snn3GUlcZU"/>
+<!-- Floating Glass Elements -->
+<div class="absolute top-20 right-10 w-48 h-32 glass-panel rounded-2xl atmospheric-shadow border border-white/10 flex flex-col justify-center px-6">
+<div class="w-8 h-8 rounded-full bg-primary/20 mb-3 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">bolt</span>
+</div>
+<div class="text-sm font-bold text-on-surface font-headline">Neural Link Active</div>
+<div class="text-xs text-on-surface-variant">Latency: 1.2ms</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- The Trust Engine -->
+<section class="py-32 px-8 relative bg-surface-container-lowest">
+<div class="absolute inset-0 bg-gradient-to-b from-surface to-surface-container-lowest opacity-50"></div>
+<div class="max-w-7xl mx-auto relative z-10 flex flex-col items-center text-center">
+<h2 class="text-4xl md:text-5xl font-extrabold tracking-tighter mb-6 font-headline">The Trust Engine</h2>
+<p class="text-xl text-primary-fixed-dim font-body mb-16 max-w-2xl">Verified Human Identity. Zero Bots. Pure Trust.</p>
+<div class="relative w-full max-w-3xl aspect-video glass-panel rounded-3xl atmospheric-shadow overflow-hidden flex items-center justify-center border-white/5">
+<!-- Conceptual Face Verification UI -->
+<div class="relative w-64 h-64">
+<div class="absolute inset-0 rounded-full border-2 border-primary/20 border-dashed animate-[spin_10s_linear_infinite]"></div>
+<div class="absolute inset-4 rounded-full border-2 border-primary/40 animate-[spin_15s_linear_infinite_reverse]"></div>
+<div class="absolute inset-8 rounded-full bg-gradient-to-b from-secondary-container/20 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-6xl text-primary glow-text" style="font-variation-settings: 'FILL' 1;">face</span>
+</div>
+<!-- Scanning Line -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary/80 blur-sm animate-[pulse_2s_ease-in-out_infinite] translate-y-32"></div>
+</div>
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-full text-sm font-bold text-primary tracking-widest border border-white/10 uppercase">
+                    Verification Complete
+                </div>
+</div>
+</div>
+</section>
+<!-- Functional Pillars (Bento Grid) -->
+<section class="py-32 px-8 relative">
+<div class="max-w-7xl mx-auto">
+<div class="mb-16">
+<h2 class="text-4xl md:text-5xl font-extrabold tracking-tighter mb-4 font-headline">Functional Pillars</h2>
+<p class="text-lg text-on-surface-variant max-w-xl">Architected for deep professional synergy.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="glass-panel p-8 rounded-3xl lg:col-span-2 group hover:bg-surface-bright transition-all duration-500 border border-white/5">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-xl">dashboard</span>
+</div>
+<h3 class="text-2xl font-bold mb-3 font-headline">Command Dashboard</h3>
+<p class="text-on-surface-variant font-body">Your central hub in the ether. Monitor real-time analytics, trust scores, and network vitality across all synced protocols.</p>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel p-8 rounded-3xl group hover:bg-surface-bright transition-all duration-500 border border-white/5">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-xl">currency_exchange</span>
+</div>
+<h3 class="text-2xl font-bold mb-3 font-headline">B2B Exchange</h3>
+<p class="text-on-surface-variant font-body">Frictionless asset and contract deployment with verified entities.</p>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel p-8 rounded-3xl group hover:bg-surface-bright transition-all duration-500 border border-white/5">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-xl">storefront</span>
+</div>
+<h3 class="text-2xl font-bold mb-3 font-headline">Event Marketplace</h3>
+<p class="text-on-surface-variant font-body">Curate and access high-value, identity-gated professional gatherings.</p>
+</div>
+<!-- Card 4 -->
+<div class="glass-panel p-8 rounded-3xl lg:col-span-2 group hover:bg-surface-bright transition-all duration-500 border border-white/5 relative overflow-hidden">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center mb-6 relative z-10 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-xl">hub</span>
+</div>
+<h3 class="text-2xl font-bold mb-3 font-headline relative z-10">Talent Hub</h3>
+<p class="text-on-surface-variant font-body relative z-10 max-w-lg">Discover and interface with deeply vetted professionals. Our AI matches intent with capability, bypassing traditional noise.</p>
+<div class="absolute right-0 bottom-0 w-64 h-64 bg-secondary-container/10 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Social Proof / Growth Tracker -->
+<section class="py-32 px-8 relative bg-surface-container-low">
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
+<div class="flex-1">
+<h2 class="text-4xl md:text-5xl font-extrabold tracking-tighter mb-6 font-headline">Milestone Tracker</h2>
+<p class="text-lg text-on-surface-variant mb-10">The network expands exponentially. Monitor our growth and earn rewards through verified referrals.</p>
+<div class="space-y-6">
+<div class="glass-panel p-6 rounded-2xl border border-white/5">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-primary font-headline">Verified Nodes</span>
+<span class="text-on-surface-variant text-sm">84% to Next Tier</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-secondary-container to-primary w-[84%] h-full rounded-full"></div>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-2xl border border-white/5">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-primary font-headline">Trust Volume</span>
+<span class="text-on-surface-variant text-sm">Active Acceleration</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-secondary-container to-primary w-[62%] h-full rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full lg:w-1/3 glass-panel p-10 rounded-3xl border border-white/5 text-center relative overflow-hidden">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-primary/10 blur-2xl"></div>
+<span class="material-symbols-outlined text-5xl text-primary mb-6 glow-text" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<h3 class="text-2xl font-bold mb-4 font-headline text-white">Referral Rewards</h3>
+<p class="text-on-surface-variant mb-8 text-sm">Invite trusted peers. Expand the ether. Earn premium network status.</p>
+<button class="w-full bg-surface-container text-primary font-bold py-3 px-6 rounded-full border border-white/10 hover:bg-white/5 transition-colors">
+                    Generate Invite Link
+                </button>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-40 px-8 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-surface to-[#1a0a24] z-[-1]"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10 glass-panel p-16 rounded-[3rem] border border-white/10 atmospheric-shadow">
+<h2 class="text-5xl md:text-6xl font-extrabold tracking-tighter mb-6 font-headline gradient-text">Integrate Now</h2>
+<p class="text-xl text-on-surface-variant mb-10 max-w-2xl mx-auto">The old web is fractured. The Synthetic Ether is unified, secure, and ready for your identity.</p>
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-4 px-12 rounded-full text-xl atmospheric-shadow hover:opacity-90 transition-opacity font-headline inline-flex items-center gap-3">
+                Join the Network
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Footer (Shared Component) -->
+<footer class="w-full py-16 bg-[#0e0e0e] relative z-10 border-t border-white/5">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto px-8">
+<div class="col-span-1 md:col-span-1">
+<div class="text-xl font-bold text-[#f1d4ff] mb-4 font-headline">SyncUp</div>
+<p class="font-['Manrope'] text-sm tracking-wide text-[#f1d4ff]/40">
+                    © 2024 SyncUp. The Synthetic Ether.
+                </p>
+</div>
+<div class="col-span-1 md:col-span-3 flex flex-wrap gap-8 justify-end items-start font-['Manrope'] text-sm tracking-wide">
+<a class="text-[#f1d4ff]/40 hover:text-[#f1d4ff] transition-colors duration-200" href="#">Privacy Protocol</a>
+<a class="text-[#f1d4ff]/40 hover:text-[#f1d4ff] transition-colors duration-200" href="#">Service Terms</a>
+<a class="text-[#f1d4ff]/40 hover:text-[#f1d4ff] transition-colors duration-200" href="#">API Documentation</a>
+<a class="text-[#f1d4ff]/40 hover:text-[#f1d4ff] transition-colors duration-200" href="#">System Status</a>
+</div>
+</div>
+</footer>
+</body></html>

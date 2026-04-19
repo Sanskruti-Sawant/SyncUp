@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SyncUp — Trusted Professional Ecosystem | Network. Deal. Hire. Experience.</title>
+    <meta name="description" content="SyncUp is a verified professional ecosystem where you can network, discover business opportunities, hire experienced talent, participate in events, and grow through one unified platform."/>
+    <meta name="theme-color" content="#131313"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="index.css"/>
+</head>
+<body>
+    <!-- ATMOSPHERIC BACKGROUND -->
+    <div class="atmosphere" aria-hidden="true">
+        <div class="atmo-orb atmo-orb--1"></div>
+        <div class="atmo-orb atmo-orb--2"></div>
+        <div class="atmo-orb atmo-orb--3"></div>
+        <canvas id="particle-canvas"></canvas>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav id="main-nav" class="nav">
+        <div class="nav__inner">
+            <a href="#" class="nav__logo" id="nav-logo">SyncUp</a>
+            <div class="nav__links" id="nav-links">
+                <a href="#platform" class="nav__link nav__link--active">Platform</a>
+                <a href="#trust" class="nav__link">Verification</a>
+                <a href="#features" class="nav__link">Features</a>
+                <a href="#events" class="nav__link">Events</a>
+                <a href="#growth" class="nav__link">Growth</a>
+            </div>
+            <button class="btn btn--primary btn--nav" id="nav-cta">
+                Sign In
+                <span class="material-symbols-outlined" style="font-size:16px; font-variation-settings: 'FILL' 1;">login</span>
+            </button>
+            <button class="nav__burger" id="nav-burger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="#platform" class="mobile-menu__link">Platform</a>
+        <a href="#trust" class="mobile-menu__link">Verification</a>
+        <a href="#features" class="mobile-menu__link">Features</a>
+        <a href="#events" class="mobile-menu__link">Events</a>
+        <a href="#growth" class="mobile-menu__link">Growth</a>
+        <button class="btn btn--primary" style="width:100%; margin-top:1rem;">Sign In</button>
+    </div>
+
+    <main>
+        <!-- ══════════════════════════════════════ -->
+        <!-- HERO SECTION                           -->
+        <!-- ══════════════════════════════════════ -->
+        <section id="platform" class="hero">
+            <div class="hero__content reveal">
+                <div class="hero__badge">
+                    <span class="hero__badge-dot"></span>
+                    <span class="hero__badge-text">Verified Professionals Only</span>
+                </div>
+                <h1 class="hero__title">
+                    <span class="hero__title-line hero__title-line--1">Network. Deal. Hire.</span>
+                    <span class="hero__title-line hero__title-line--2 gradient-text glow-text">Experience.</span>
+                </h1>
+                <p class="hero__subtitle">
+                    SyncUp combines professional networking, business opportunities, experienced hiring, B2B collaboration, and event discovery into one trusted, AI-powered ecosystem. Verified humans only.
+                </p>
+                <div class="hero__actions">
+                    <button class="btn btn--gradient btn--lg" id="hero-cta-primary">
+                        Get Started Free
+                    </button>
+                    <button class="btn btn--glass btn--lg" id="hero-cta-secondary">
+                        Watch Demo
+                    </button>
+                </div>
+                <!-- Platform Stats -->
+                <div class="hero__stats">
+                    <div class="hero__stat glass-panel">
+                        <span class="hero__stat-number" data-count="120000">0</span>
+                        <span class="hero__stat-label">Verified Users</span>
+                    </div>
+                    <div class="hero__stat glass-panel">
+                        <span class="hero__stat-number" data-count="12000">0</span>
+                        <span class="hero__stat-label">Business Listings</span>
+                    </div>
+                    <div class="hero__stat glass-panel">
+                        <span class="hero__stat-number" data-count="500">0</span>
+                        <span class="hero__stat-label">Live Events</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero__visual">
+                <div class="hero__orb-container">
+                    <div class="hero__orb-glow"></div>
+                    <div class="hero__orb hero__orb--main">
+                        <div class="hero__orb-ring hero__orb-ring--1"></div>
+                        <div class="hero__orb-ring hero__orb-ring--2"></div>
+                        <div class="hero__orb-ring hero__orb-ring--3"></div>
+                        <div class="hero__orb-core"></div>
+                    </div>
+                    <div class="hero__float-card hero__float-card--1 glass-panel">
+                        <div class="hero__float-card-icon">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                        </div>
+                        <div class="hero__float-card-text">
+                            <strong>Face Verified</strong>
+                            <small>Real Human Confirmed</small>
+                        </div>
+                    </div>
+                    <div class="hero__float-card hero__float-card--2 glass-panel">
+                        <div class="hero__float-card-icon">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                        </div>
+                        <div class="hero__float-card-text">
+                            <strong>AI-Powered</strong>
+                            <small>Smart Recommendations</small>
+                        </div>
+                    </div>
+                    <div class="hero__float-card hero__float-card--3 glass-panel">
+                        <div class="hero__float-card-icon">
+                            <span class="material-symbols-outlined">handshake</span>
+                        </div>
+                        <div class="hero__float-card-text">
+                            <strong>B2B Exchange</strong>
+                            <small>Verified Partnerships</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- TRUST & VERIFICATION ENGINE             -->
+        <!-- ══════════════════════════════════════ -->
+        <section id="trust" class="trust">
+            <div class="trust__inner">
+                <div class="trust__header reveal">
+                    <h2 class="section-title">Verified Human Identity</h2>
+                    <p class="section-subtitle">Fast, accurate face verification. Zero bots. Zero fakes. Zero duplicates.</p>
+                </div>
+                <div class="trust__visual reveal">
+                    <div class="trust__scanner glass-panel">
+                        <div class="trust__scanner-rings">
+                            <div class="trust__ring trust__ring--outer"></div>
+                            <div class="trust__ring trust__ring--middle"></div>
+                            <div class="trust__ring trust__ring--inner">
+                                <span class="material-symbols-outlined trust__face-icon" style="font-variation-settings: 'FILL' 1;">face</span>
+                            </div>
+                        </div>
+                        <div class="trust__scan-line"></div>
+                        <div class="trust__status glass-panel">
+                            <span class="trust__status-dot"></span>
+                            Identity Verified
+                        </div>
+                    </div>
+                </div>
+                <!-- Verification Features -->
+                <div class="trust__metrics reveal">
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">security</span>
+                        <h3 class="trust__metric-title">Anti-Spoofing Detection</h3>
+                        <p class="trust__metric-desc">Defeats printed photos, screen captures, masks, and static images. Only real, live human faces pass verification.</p>
+                    </div>
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">fingerprint</span>
+                        <h3 class="trust__metric-title">Duplicate Prevention</h3>
+                        <p class="trust__metric-desc">Advanced biometric matching ensures no user creates multiple accounts. One identity, one profile, absolute trust.</p>
+                    </div>
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">domain_verification</span>
+                        <h3 class="trust__metric-title">Company Verification</h3>
+                        <p class="trust__metric-desc">Integrated with map and business listing services to verify company authenticity and prevent duplicate registrations.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- NINE PILLARS — BENTO GRID               -->
+        <!-- ══════════════════════════════════════ -->
+        <section id="features" class="pillars">
+            <div class="pillars__inner">
+                <div class="pillars__header reveal">
+                    <h2 class="section-title">Nine Pillars. One Ecosystem.</h2>
+                    <p class="section-subtitle--left">Everything professionals, founders, recruiters, investors, and businesses need — unified.</p>
+                </div>
+                <div class="pillars__grid">
+                    <!-- Pillar 1: Promotion -->
+                    <div class="pillar-card pillar-card--wide glass-panel reveal" id="pillar-promotion">
+                        <div class="pillar-card__icon-wrap">
+                            <span class="material-symbols-outlined">campaign</span>
+                        </div>
+                        <h3 class="pillar-card__title">Smart Promotion & Sponsored Reach</h3>
+                        <p class="pillar-card__desc">Targeted sponsored placements, campaign-based discovery, audience targeting, and performance analytics. Help your profile, business, event, or opportunity reach the right people.</p>
+                    </div>
+                    <!-- Pillar 2: Professional Network -->
+                    <div class="pillar-card glass-panel reveal" id="pillar-network">
+                        <div class="pillar-card__icon-wrap">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <h3 class="pillar-card__title">Professional Network</h3>
+                        <p class="pillar-card__desc">Build verified profiles, share professional updates, make connections, and discover opportunities in a clutter-free business environment.</p>
+                    </div>
+                    <!-- Pillar 3: Business Marketplace -->
+                    <div class="pillar-card glass-panel reveal" id="pillar-business">
+                        <div class="pillar-card__icon-wrap">
+                            <span class="material-symbols-outlined">store</span>
+                        </div>
+                        <h3 class="pillar-card__title">Business Opportunity Marketplace</h3>
+                        <p class="pillar-card__desc">Discover startups, investors, partners, buyers, and service providers for funding, acquisitions, and strategic collaboration.</p>
+                    </div>
+                    <!-- Pillar 4: B2B Services -->
+                    <div class="pillar-card glass-panel reveal" id="pillar-b2b">
+                        <div class="pillar-card__icon-wrap">
+                            <span class="material-symbols-outlined">handshake</span>
+                        </div>
+                        <h3 class="pillar-card__title">B2B Service Exchange</h3>
+                        <p class="pillar-card__desc">Company-to-company project collaboration, consulting, outsourcing, proposals, contract tracking, and delivery milestones.</p>
+                    </div>
+                    <!-- Pillar 5: Jobs -->
+                    <div class="pillar-card glass-panel reveal" id="pillar-jobs">
+                        <div class="pillar-card__icon-wrap">
+                            <span class="material-symbols-outlined">work</span>
+                        </div>
+                        <h3 class="pillar-card__title">Experienced Professional Hiring</h3>
+                        <p class="pillar-card__desc">Job listings exclusively for experienced professionals. Quality hiring, role matching, and professional credibility — no freshers.</p>
+                    </div>
+                    <!-- Pillar 6: AI Assistance -->
+                    <div class="pillar-card pillar-card--wide glass-panel reveal" id="pillar-ai">
+                        <div class="pillar-card__icon-wrap">
+                            <span class="material-symbols-outlined">psychology</span>
+                        </div>
+                        <h3 class="pillar-card__title">AI-Powered Assistance</h3>
+                        <p class="pillar-card__desc">Smart recommendations, profile optimization tips, campaign suggestions, opportunity matching, content enhancement, and guided onboarding. AI helps you act more effectively across every feature.</p>
+                        <div class="pillar-card__glow"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- EVENTS & PARTICIPATION                  -->
+        <!-- ══════════════════════════════════════ -->
+        <section id="events" class="trust">
+            <div class="trust__inner">
+                <div class="trust__header reveal">
+                    <h2 class="section-title">Events & Participation</h2>
+                    <p class="section-subtitle">Discover, create, promote, and participate in hackathons, workshops, conferences, startup showcases, and networking sessions.</p>
+                </div>
+                <div class="trust__metrics reveal">
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">confirmation_number</span>
+                        <h3 class="trust__metric-title">Ticketing & Registration</h3>
+                        <p class="trust__metric-desc">Seamless registration, booking, and ticketing system with access control, schedules, reminders, and attendance tracking.</p>
+                    </div>
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">verified</span>
+                        <h3 class="trust__metric-title">Event Authenticity</h3>
+                        <p class="trust__metric-desc">Organizer verification, trust scoring, escrow-based payments, cancellation policies, and attendee protection against fraud.</p>
+                    </div>
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">analytics</span>
+                        <h3 class="trust__metric-title">Event Analytics</h3>
+                        <p class="trust__metric-desc">Real-time insights on registrations, attendance, engagement, and revenue — giving organizers full visibility into event performance.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- GROWTH, REFERRALS & REWARDS             -->
+        <!-- ══════════════════════════════════════ -->
+        <section id="growth" class="milestones">
+            <div class="milestones__inner">
+                <div class="milestones__content reveal">
+                    <h2 class="section-title">Growth & Referral Rewards</h2>
+                    <p class="section-subtitle--left">Every user gets a unique referral code. Invite trusted professionals, track your impact, and earn milestone rewards as the network grows.</p>
+                    <div class="milestones__bars">
+                        <div class="milestone-bar glass-panel">
+                            <div class="milestone-bar__header">
+                                <span class="milestone-bar__label">100 Verified Referrals</span>
+                                <span class="milestone-bar__value">🎁 Gift Reward</span>
+                            </div>
+                            <div class="milestone-bar__track">
+                                <div class="milestone-bar__fill" data-width="33"></div>
+                            </div>
+                        </div>
+                        <div class="milestone-bar glass-panel">
+                            <div class="milestone-bar__header">
+                                <span class="milestone-bar__label">500 Verified Referrals</span>
+                                <span class="milestone-bar__value">🏆 Premium Reward</span>
+                            </div>
+                            <div class="milestone-bar__track">
+                                <div class="milestone-bar__fill" data-width="62"></div>
+                            </div>
+                        </div>
+                        <div class="milestone-bar glass-panel">
+                            <div class="milestone-bar__header">
+                                <span class="milestone-bar__label">1,000 Fastest Referrals</span>
+                                <span class="milestone-bar__value">📱 Mega Prize — Flagship Device</span>
+                            </div>
+                            <div class="milestone-bar__track">
+                                <div class="milestone-bar__fill" data-width="91"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="milestones__cta reveal">
+                    <div class="referral-card glass-panel">
+                        <div class="referral-card__glow"></div>
+                        <span class="material-symbols-outlined referral-card__icon" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+                        <h3 class="referral-card__title">Referral Leaderboard</h3>
+                        <p class="referral-card__desc">Fraud-resistant tracking, auto reward eligibility, leaderboard rankings, and admin reward management. Grow the ecosystem and get recognized.</p>
+                        <button class="btn btn--glass btn--full" id="referral-btn">Generate Invite Link</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- ADVERTISING & COUPON ENGINE             -->
+        <!-- ══════════════════════════════════════ -->
+        <section class="trust">
+            <div class="trust__inner">
+                <div class="trust__header reveal">
+                    <h2 class="section-title">Advertising & Promotions</h2>
+                    <p class="section-subtitle">Run targeted campaigns with auto-generated coupons, promotional credits, and performance analytics.</p>
+                </div>
+                <div class="trust__metrics reveal">
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">redeem</span>
+                        <h3 class="trust__metric-title">Smart Coupon Engine</h3>
+                        <p class="trust__metric-desc">Spend ₹60,000, get ₹1,20,000 in promotional value. Auto coupon generation with expiry management, wallet tracking, and usage analytics.</p>
+                    </div>
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">target</span>
+                        <h3 class="trust__metric-title">Audience Targeting</h3>
+                        <p class="trust__metric-desc">Reach the right professionals, companies, and decision-makers. Sponsor posts, events, profiles, or business listings with precision targeting.</p>
+                    </div>
+                    <div class="trust__metric glass-panel">
+                        <span class="material-symbols-outlined trust__metric-icon">monitoring</span>
+                        <h3 class="trust__metric-title">Campaign Analytics</h3>
+                        <p class="trust__metric-desc">Real-time reach, engagement, and conversion metrics. Campaign redemption history, ROI tracking, and promotional wallet management.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- FINAL CTA                               -->
+        <!-- ══════════════════════════════════════ -->
+        <section class="final-cta">
+            <div class="final-cta__bg"></div>
+            <div class="final-cta__inner reveal">
+                <div class="final-cta__card glass-panel">
+                    <h2 class="final-cta__title gradient-text">Start Building Your Future Today</h2>
+                    <p class="final-cta__desc">One profile. Every platform. Network, discover opportunities, hire talent, attend events, and grow — all in one trusted, verified ecosystem.</p>
+                    <button class="btn btn--gradient btn--xl" id="final-cta-btn">
+                        Join SyncUp Free
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer__inner">
+            <div class="footer__brand">
+                <div class="footer__logo">SyncUp</div>
+                <p class="footer__copy">&copy; 2024 SyncUp. The Trusted Professional Ecosystem.</p>
+            </div>
+            <div class="footer__links">
+                <a href="#" class="footer__link">Privacy Policy</a>
+                <a href="#" class="footer__link">Terms of Service</a>
+                <a href="#" class="footer__link">API Documentation</a>
+                <a href="#" class="footer__link">System Status</a>
+                <a href="#" class="footer__link">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+</html>

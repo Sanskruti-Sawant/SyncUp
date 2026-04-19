@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SyncUp — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
+<style>
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.auth-card{width:100%;max-width:440px;padding:3rem;border-radius:1.5rem}
+.auth-tabs{display:flex;gap:0;margin-bottom:2rem;border-radius:9999px;overflow:hidden;background:var(--surface-high)}
+.auth-tab{flex:1;padding:.75rem;text-align:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;border:none;cursor:pointer;background:transparent;color:var(--on-surface-variant);transition:all .3s}
+.auth-tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-container));color:var(--on-primary)}
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.form-input{width:100%;padding:.9rem 1rem;border-radius:.75rem;border:1px solid rgba(255,255,255,.06);background:var(--surface-highest);color:var(--on-surface);font-family:'Manrope',sans-serif;font-size:.95rem;transition:all .3s;outline:none}
+.form-input:focus{border-color:rgba(224,176,255,.3);box-shadow:0 0 0 3px rgba(224,176,255,.08)}
+.form-input::placeholder{color:rgba(206,195,208,.4)}
+.auth-footer{text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--on-surface-variant)}
+.auth-footer a{color:var(--primary);font-weight:600}
+.alert{padding:1rem;border-radius:.75rem;margin-bottom:1rem;font-size:.85rem}
+.alert--error{background:rgba(255,107,107,.1);color:#ff6b6b}
+.alert--success{background:rgba(224,176,255,.1);color:var(--primary)}
+.auth-title{font-size:1.8rem;font-weight:800;text-align:center;margin-bottom:.5rem;letter-spacing:-.03em}
+.auth-sub{text-align:center;color:var(--on-surface-variant);font-size:.9rem;margin-bottom:2rem}
+</style>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true"><div class="atmo-orb atmo-orb--1"></div><div class="atmo-orb atmo-orb--2"></div></div>
+<nav class="nav"><div class="nav__inner"><a href="/" class="nav__logo">SyncUp</a><div class="nav__links"><a href="/" class="nav__link">Home</a></div></div></nav>
+
+<div class="auth-page">
+<div class="auth-card glass-panel">
+  <h1 class="auth-title gradient-text">Welcome to SyncUp</h1>
+  <p class="auth-sub">Verified professionals only. No bots. No fakes.</p>
+  <div id="alert"></div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="showTab('login')">Sign In</button>
+    <button class="auth-tab" onclick="showTab('register')">Sign Up</button>
+  </div>
+
+  <!-- Login Form -->
+  <form id="login-form" onsubmit="handleLogin(event)">
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="login-email" placeholder="you@company.com" required></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="login-password" placeholder="••••••••" required></div>
+    <button type="submit" class="btn btn--gradient btn--full btn--lg" style="margin-top:.5rem">Sign In</button>
+  </form>
+
+  <!-- Register Form -->
+  <form id="register-form" style="display:none" onsubmit="handleRegister(event)">
+    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="reg-name" placeholder="Your professional name" required minlength="2"></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="reg-email" placeholder="you@company.com" required></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" required minlength="8"></div>
+    <div class="form-group"><label class="form-label">Referral Code (Optional)</label><input class="form-input" type="text" id="reg-referral" placeholder="SU-XXXXXXXX"></div>
+    <button type="submit" class="btn btn--gradient btn--full btn--lg" style="margin-top:.5rem">Create Account</button>
+  </form>
+
+  <div class="auth-footer">
+    <p>By continuing, you agree to SyncUp's <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+  </div>
+</div>
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+
+function showTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => { t.classList.toggle('active', (tab==='login'?i===0:i===1)); });
+  document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('alert').innerHTML = '';
+}
+
+function showAlert(msg, type='error') {
+  document.getElementById('alert').innerHTML = `<div class="alert alert--${type}">${msg}</div>`;
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  try {
+    const res = await fetch(API+'/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value })
+    });
+    const data = await res.json();
+    if (!res.ok) return showAlert(data.error);
+    localStorage.setItem('syncup_token', data.token);
+    localStorage.setItem('syncup_user', JSON.stringify(data.user));
+    if (!data.user.isVerified) { window.location.href = '/verify'; }
+    else { window.location.href = '/dashboard'; }
+  } catch(err) { showAlert('Connection error. Please try again.'); }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  try {
+    const res = await fetch(API+'/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('reg-name').value,
+        email: document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value,
+        referralCode: document.getElementById('reg-referral').value || undefined
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) return showAlert(data.error);
+    localStorage.setItem('syncup_token', data.token);
+    localStorage.setItem('syncup_user', JSON.stringify(data.user));
+    showAlert('Account created! Redirecting to face verification...', 'success');
+    setTimeout(() => { window.location.href = '/verify'; }, 1500);
+  } catch(err) { showAlert('Connection error. Please try again.'); }
+}
+
+// Pre-fill referral from URL
+const params = new URLSearchParams(window.location.search);
+if (params.get('ref')) { document.getElementById('reg-referral').value = params.get('ref'); showTab('register'); }
+
+// Redirect if already logged in
+if (localStorage.getItem('syncup_token')) {
+  const user = JSON.parse(localStorage.getItem('syncup_user') || '{}');
+  if (user.isVerified) window.location.href = '/dashboard';
+  else window.location.href = '/verify';
+}
+</script>
+</body>
+</html>

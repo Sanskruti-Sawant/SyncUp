@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<title>SyncUp — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
+<style>
+.dash{max-width:80rem;margin:6rem auto 2rem;padding:0 2rem}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.dash-welcome h1{font-size:2rem;font-weight:800;letter-spacing:-.03em}
+.dash-welcome p{color:var(--on-surface-variant);font-size:.95rem}
+.dash-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border-radius:9999px;font-size:.75rem;font-weight:700}
+.dash-badge.verified{background:rgba(74,222,128,.1);color:#4ade80}
+.dash-badge.unverified{background:rgba(255,107,107,.1);color:#ff6b6b}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.dash-card{padding:2rem;border-radius:1.5rem;transition:background .4s}
+.dash-card:hover{background:var(--surface-bright)}
+.dash-card__header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.dash-card__icon{width:2.5rem;height:2.5rem;border-radius:.6rem;display:flex;align-items:center;justify-content:center;background:rgba(241,212,255,.1);color:var(--primary)}
+.dash-card__title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700}
+.dash-card__body{color:var(--on-surface-variant);font-size:.9rem;line-height:1.6}
+.post-form{margin-bottom:2rem}
+.post-input{width:100%;padding:1rem 1.25rem;border-radius:1rem;border:1px solid rgba(255,255,255,.05);background:var(--surface-highest);color:var(--on-surface);font-family:'Manrope',sans-serif;font-size:.95rem;resize:none;min-height:80px;outline:none;transition:border .3s}
+.post-input:focus{border-color:rgba(224,176,255,.3)}
+.post-actions{display:flex;justify-content:flex-end;margin-top:.75rem}
+.feed-post{padding:1.5rem;border-radius:1rem;margin-bottom:1rem}
+.feed-post__author{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.feed-post__avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-container));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--on-primary)}
+.feed-post__name{font-weight:700;font-size:.9rem}
+.feed-post__headline{font-size:.75rem;color:var(--on-surface-variant)}
+.feed-post__content{font-size:.9rem;line-height:1.6;margin-bottom:1rem}
+.feed-post__actions{display:flex;gap:1.5rem}
+.feed-post__action{display:flex;align-items:center;gap:.3rem;color:var(--on-surface-variant);font-size:.8rem;cursor:pointer;transition:color .2s;background:none;border:none;font-family:inherit}
+.feed-post__action:hover{color:var(--primary)}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:2rem;overflow-x:auto;padding-bottom:.5rem}
+.tab-btn{padding:.6rem 1.2rem;border-radius:9999px;border:1px solid rgba(255,255,255,.06);background:transparent;color:var(--on-surface-variant);font-family:'Manrope',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;white-space:nowrap}
+.tab-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-container));color:var(--on-primary);border-color:transparent}
+.section-block{margin-bottom:3rem}
+.section-block h2{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:1.5rem}
+.ref-code{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-radius:.75rem;background:var(--surface-highest);margin:1rem 0}
+.ref-code input{flex:1;background:transparent;border:none;color:var(--primary);font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;outline:none}
+.ref-code button{padding:.5rem 1rem;font-size:.8rem}
+.milestone-row{display:flex;align-items:center;gap:1rem;padding:.75rem 0}
+.milestone-row__progress{flex:1;height:6px;background:var(--surface-highest);border-radius:9999px;overflow:hidden}
+.milestone-row__fill{height:100%;background:linear-gradient(90deg,var(--secondary-container),var(--primary));border-radius:9999px}
+.milestone-row__label{min-width:80px;font-size:.85rem;font-weight:600;color:var(--primary)}
+.milestone-row__reward{font-size:.8rem;color:var(--on-surface-variant);min-width:100px;text-align:right}
+</style>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true"><div class="atmo-orb atmo-orb--1"></div><div class="atmo-orb atmo-orb--2"></div></div>
+<nav class="nav"><div class="nav__inner">
+  <a href="/" class="nav__logo">SyncUp</a>
+  <div class="nav__links">
+    <a href="/" class="nav__link">Home</a>
+    <a href="/dashboard" class="nav__link nav__link--active">Dashboard</a>
+  </div>
+  <button class="btn btn--glass btn--nav" onclick="logout()" id="logout-btn">Sign Out</button>
+</div></nav>
+
+<div class="dash">
+  <div class="dash-header">
+    <div class="dash-welcome">
+      <h1 id="welcome-name">Welcome back</h1>
+      <p id="welcome-sub">Your professional command center</p>
+    </div>
+    <div>
+      <span class="dash-badge" id="verify-badge">Loading...</span>
+      <span class="dash-badge" id="trust-badge" style="margin-left:.5rem;background:rgba(224,176,255,.1);color:var(--primary)">Trust: 0</span>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-bar" id="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('feed')">Feed</button>
+    <button class="tab-btn" onclick="switchTab('jobs')">Jobs</button>
+    <button class="tab-btn" onclick="switchTab('events')">Events</button>
+    <button class="tab-btn" onclick="switchTab('referrals')">Referrals</button>
+    <button class="tab-btn" onclick="switchTab('companies')">Companies</button>
+    <button class="tab-btn" onclick="switchTab('b2b')">B2B Services</button>
+    <button class="tab-btn" onclick="switchTab('opportunities')">Investments</button>
+    <button class="tab-btn" onclick="switchTab('ai')">✨ AI Assistant</button>
+    <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
+  </div>
+
+  <!-- FEED TAB -->
+  <div id="tab-feed" class="section-block">
+    <div class="post-form glass-panel" style="padding:1.5rem;border-radius:1.5rem">
+      <textarea class="post-input" id="post-content" placeholder="Share a professional update..."></textarea>
+      <div class="post-actions"><button class="btn btn--gradient" onclick="createPost()">Publish</button></div>
+    </div>
+    <div id="feed-list"></div>
+  </div>
+
+  <!-- JOBS TAB -->
+  <div id="tab-jobs" class="section-block" style="display:none">
+    <h2>Experienced Professional Jobs</h2>
+    <div id="jobs-list" class="dash-grid"></div>
+  </div>
+
+  <!-- EVENTS TAB -->
+  <div id="tab-events" class="section-block" style="display:none">
+    <h2>Discover Events</h2>
+    <div id="events-list" class="dash-grid"></div>
+  </div>
+
+  <!-- REFERRALS TAB -->
+  <div id="tab-referrals" class="section-block" style="display:none">
+    <h2>Referral & Rewards</h2>
+    <div class="dash-card glass-panel">
+      <div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">share</span></div><div class="dash-card__title">Your Referral Link</div></div>
+      <div class="ref-code"><input id="ref-code-input" readonly/><button class="btn btn--glass" onclick="copyRef()">Copy</button></div>
+    </div>
+    <div style="margin-top:1.5rem" id="milestones-container"></div>
+  </div>
+
+  <!-- COMPANIES TAB -->
+  <div id="tab-companies" class="section-block" style="display:none">
+    <h2>Companies</h2>
+    <div id="companies-list" class="dash-grid"></div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div id="tab-profile" class="section-block" style="display:none">
+    <h2>Edit Profile</h2>
+    <div class="dash-card glass-panel">
+      <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Headline</label><input class="form-input" id="profile-headline" placeholder="e.g. Senior Engineer at Google"/></div>
+      <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Bio</label><textarea class="post-input" id="profile-bio" placeholder="Tell professionals about yourself..." style="min-height:100px"></textarea></div>
+      <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Skills (comma-separated)</label><input class="form-input" id="profile-skills" placeholder="JavaScript, Leadership, Product"/></div>
+      <button class="btn btn--gradient" onclick="updateProfile()">Save Profile</button>
+    </div>
+  </div>
+
+  <!-- B2B TAB -->
+  <div id="tab-b2b" class="section-block" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2>B2B Service Exchange</h2>
+      <button class="btn btn--glass" onclick="alert('In a full app, this opens a modal to post a new B2B project.')">+ Post Project</button>
+    </div>
+    <div id="b2b-list" class="dash-grid"></div>
+  </div>
+
+  <!-- INVESTMENTS TAB -->
+  <div id="tab-opportunities" class="section-block" style="display:none">
+    <h2>Investment Opportunities</h2>
+    <p style="color:var(--on-surface-variant);margin-bottom:1.5rem">Direct owner-to-investor trust. No middlemen.</p>
+    <div id="investments-list" class="dash-grid"></div>
+  </div>
+
+  <!-- AI TIPS TAB -->
+  <div id="tab-ai" class="section-block" style="display:none">
+    <h2>✨ AI Assistant</h2>
+    <p style="color:var(--on-surface-variant);margin-bottom:1.5rem">Personalized insights to accelerate your professional growth.</p>
+    <div class="dash-grid" style="grid-template-columns: 1fr">
+      <div class="dash-card glass-panel" style="background:linear-gradient(135deg,rgba(110,60,255,0.1),rgba(40,20,100,0.2));border:1px solid rgba(110,60,255,0.3)">
+        <div class="dash-card__header"><div class="dash-card__icon" style="background:var(--primary);color:#fff"><span class="material-symbols-outlined">lightbulb</span></div><div class="dash-card__title">Profile Optimization</div></div>
+        <div id="ai-profile-tips" class="dash-card__body">Loading AI insights...</div>
+      </div>
+      <div class="dash-card glass-panel" style="background:linear-gradient(135deg,rgba(0,255,150,0.05),rgba(0,100,50,0.1));border:1px solid rgba(0,255,150,0.2)">
+        <div class="dash-card__header"><div class="dash-card__icon" style="background:#00d285;color:#fff"><span class="material-symbols-outlined">trending_up</span></div><div class="dash-card__title">Campaign Strategy</div></div>
+        <div id="ai-campaign-tips" class="dash-card__body">Loading AI insights...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+const token = localStorage.getItem('syncup_token');
+if (!token) window.location.href = '/login';
+const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+let currentUser = JSON.parse(localStorage.getItem('syncup_user') || '{}');
+
+// Init
+(async () => {
+  try {
+    const res = await fetch(API + '/auth/me', { headers });
+    const data = await res.json();
+    if (!res.ok) { logout(); return; }
+    currentUser = data.user;
+    localStorage.setItem('syncup_user', JSON.stringify(currentUser));
+    document.getElementById('welcome-name').textContent = `Welcome, ${currentUser.name}`;
+    document.getElementById('verify-badge').textContent = currentUser.isVerified ? '✓ Verified' : '⚠ Unverified';
+    document.getElementById('verify-badge').className = `dash-badge ${currentUser.isVerified ? 'verified' : 'unverified'}`;
+    document.getElementById('trust-badge').textContent = `Trust: ${currentUser.trustScore}`;
+    if (currentUser.headline) document.getElementById('profile-headline').value = currentUser.headline;
+    if (currentUser.bio) document.getElementById('profile-bio').value = currentUser.bio;
+    if (currentUser.skills) document.getElementById('profile-skills').value = currentUser.skills.join(', ');
+    loadFeed(); loadReferrals();
+  } catch(e) { console.error(e); }
+})();
+
+function switchTab(tab) {
+  document.querySelectorAll('.section-block').forEach(s => s.style.display = 'none');
+  document.getElementById('tab-' + tab).style.display = 'block';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'jobs') loadJobs();
+  if (tab === 'events') loadEvents();
+  if (tab === 'companies') loadCompanies();
+  if (tab === 'b2b') loadB2B();
+  if (tab === 'opportunities') loadInvestments();
+  if (tab === 'ai') loadAI();
+}
+
+async function loadFeed() {
+  const res = await fetch(API + '/posts', { headers });
+  const { posts } = await res.json();
+  document.getElementById('feed-list').innerHTML = posts.length === 0
+    ? '<div class="glass-panel" style="padding:2rem;text-align:center;border-radius:1rem;color:var(--on-surface-variant)">No posts yet. Be the first to share!</div>'
+    : posts.map(p => `<div class="feed-post glass-panel">
+      <div class="feed-post__author"><div class="feed-post__avatar">${(p.author?.name||'?')[0]}</div><div><div class="feed-post__name">${p.author?.name||'Unknown'} ${p.author?.isVerified?'<span style="color:#4ade80">✓</span>':''}</div><div class="feed-post__headline">${p.author?.headline||''}</div></div></div>
+      <div class="feed-post__content">${p.content}</div>
+      <div class="feed-post__actions">
+        <button class="feed-post__action" onclick="likePost('${p._id}')"><span class="material-symbols-outlined" style="font-size:1rem">favorite</span> ${p.likes?.length||0}</button>
+        <button class="feed-post__action"><span class="material-symbols-outlined" style="font-size:1rem">comment</span> ${p.comments?.length||0}</button>
+      </div></div>`).join('');
+}
+
+async function createPost() {
+  const content = document.getElementById('post-content').value.trim();
+  if (!content) return;
+  await fetch(API + '/posts', { method: 'POST', headers, body: JSON.stringify({ content }) });
+  document.getElementById('post-content').value = '';
+  loadFeed();
+}
+
+async function likePost(id) { await fetch(API + '/posts/' + id + '/like', { method: 'POST', headers }); loadFeed(); }
+
+async function loadJobs() {
+  const res = await fetch(API + '/jobs', { headers });
+  const { jobs } = await res.json();
+  document.getElementById('jobs-list').innerHTML = jobs.length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No jobs posted yet.</p></div>'
+    : jobs.map(j => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">work</span></div><div class="dash-card__title">${j.title}</div></div><div class="dash-card__body"><p>${j.company?.name||''} · ${j.experienceMin}+ yrs · ${j.type||'full-time'}</p><p style="margin-top:.5rem">${(j.description||'').slice(0,120)}...</p><button class="btn btn--glass" style="margin-top:1rem" onclick="applyJob('${j._id}')">Apply</button></div></div>`).join('');
+}
+
+async function applyJob(id) {
+  const res = await fetch(API + '/jobs/' + id + '/apply', { method: 'POST', headers, body: JSON.stringify({}) });
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function loadEvents() {
+  const res = await fetch(API + '/events', { headers });
+  const { events } = await res.json();
+  document.getElementById('events-list').innerHTML = events.length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No events yet.</p></div>'
+    : events.map(e => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">event</span></div><div class="dash-card__title">${e.title}</div></div><div class="dash-card__body"><p>${e.type} · ${new Date(e.startDate).toLocaleDateString()}</p><p style="margin-top:.5rem">${(e.description||'').slice(0,120)}...</p><p style="margin-top:.5rem;color:var(--primary);font-weight:700">₹${e.ticketPrice||'Free'} · ${e.attendees?.length||0} registered</p><button class="btn btn--glass" style="margin-top:1rem" onclick="registerEvent('${e._id}')">Register</button></div></div>`).join('');
+}
+
+async function registerEvent(id) {
+  const res = await fetch(API + '/events/' + id + '/register', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function loadCompanies() {
+  const res = await fetch(API + '/companies', { headers });
+  const { companies } = await res.json();
+  document.getElementById('companies-list').innerHTML = companies.length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No companies yet.</p></div>'
+    : companies.map(c => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">business</span></div><div class="dash-card__title">${c.name} ${c.isVerified?'<span style="color:#4ade80">✓</span>':''}</div></div><div class="dash-card__body"><p>${c.industry||''} · ${c.size||''}</p><p style="margin-top:.5rem">${(c.description||'').slice(0,120)}...</p></div></div>`).join('');
+}
+
+async function loadReferrals() {
+  try {
+    const [codeRes, mRes] = await Promise.all([
+      fetch(API + '/referrals/code', { headers }),
+      fetch(API + '/referrals/milestones', { headers })
+    ]);
+    const codeData = await codeRes.json();
+    const mData = await mRes.json();
+    document.getElementById('ref-code-input').value = window.location.origin + '/login?ref=' + codeData.referralCode;
+    const mc = document.getElementById('milestones-container');
+    mc.innerHTML = (mData.milestones || []).map(m => {
+      const pct = Math.min((mData.verifiedReferrals / m.target) * 100, 100);
+      return `<div class="milestone-row"><span class="milestone-row__label">${m.target}</span><div class="milestone-row__progress"><div class="milestone-row__fill" style="width:${pct}%"></div></div><span class="milestone-row__reward">${m.reward}</span></div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function copyRef() {
+  const inp = document.getElementById('ref-code-input');
+  inp.select(); navigator.clipboard.writeText(inp.value);
+  alert('Referral link copied!');
+}
+
+async function updateProfile() {
+  const res = await fetch(API + '/users/profile', {
+    method: 'PUT', headers,
+    body: JSON.stringify({
+      headline: document.getElementById('profile-headline').value,
+      bio: document.getElementById('profile-bio').value,
+      skills: document.getElementById('profile-skills').value.split(',').map(s => s.trim()).filter(Boolean)
+    })
+  });
+  if (res.ok) alert('Profile updated!');
+}
+
+async function loadB2B() {
+  const res = await fetch(API + '/b2b/projects', { headers });
+  const { projects } = await res.json();
+  document.getElementById('b2b-list').innerHTML = (projects||[]).length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No active B2B projects.</p></div>'
+    : projects.map(p => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">handshake</span></div><div class="dash-card__title">${p.title}</div></div><div class="dash-card__body"><p>Budget: <b>₹${p.budget.toLocaleString()}</b></p><p style="margin-top:.5rem">${(p.description||'').slice(0,120)}...</p><button class="btn btn--glass" style="margin-top:1rem" onclick="alert('Proposal flow initialized')">Submit Proposal</button></div></div>`).join('');
+}
+
+async function loadInvestments() {
+  const res = await fetch(API + '/investment/opportunities', { headers });
+  const { opportunities } = await res.json();
+  document.getElementById('investments-list').innerHTML = (opportunities||[]).length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No active investment opportunities.</p></div>'
+    : opportunities.map(o => {
+        const d = o.investmentDetails || {};
+        return `<div class="dash-card glass-panel" style="border: 1px solid rgba(255,215,0,0.2)"><div class="dash-card__header"><div class="dash-card__icon" style="color:gold"><span class="material-symbols-outlined">attach_money</span></div><div class="dash-card__title">${o.name} <span style="color:#4ade80">✓</span></div></div><div class="dash-card__body"><p>Seeking: <b>₹${(d.seekingAmount||0).toLocaleString()}</b> for <b>${d.equityOffered||0}%</b> Equity</p><p style="margin-top:.5rem;color:var(--on-surface-variant);font-size:0.85rem">Direct Contact: ${o.owner?.name||'Verified Owner'}</p><p style="margin-top:.5rem">${(d.description||'').slice(0,120)}...</p><button class="btn btn--gradient" style="margin-top:1rem" onclick="alert('Direct connection request sent to owner')">Express Interest</button></div></div>`;
+      }).join('');
+}
+
+async function loadAI() {
+  try {
+    const [pRes, cRes] = await Promise.all([
+      fetch(API + '/ai/profile-tips', { headers }),
+      fetch(API + '/ai/campaign-tips', { headers })
+    ]);
+    const pData = await pRes.json();
+    const cData = await cRes.json();
+    
+    document.getElementById('ai-profile-tips').innerHTML = `
+      <div style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.3rem"><span>Profile Completeness</span><span>${pData.completeness}%</span></div>
+        <div style="width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px"><div style="width:${pData.completeness}%;height:100%;background:var(--primary);border-radius:3px"></div></div>
+      </div>
+      <ul style="padding-left:1.2rem">
+        ${(pData.tips||[]).map(t => `<li style="margin-bottom:0.5rem">${t.tip}</li>`).join('')}
+      </ul>`;
+
+    document.getElementById('ai-campaign-tips').innerHTML = `
+      <ul style="padding-left:1.2rem">
+        ${(cData.tips||[]).map(t => `<li style="margin-bottom:0.5rem">${t.tip}</li>`).join('')}
+      </ul>`;
+  } catch(e) {}
+}
+
+function logout() { localStorage.removeItem('syncup_token'); localStorage.removeItem('syncup_user'); window.location.href = '/login'; }
+</script>
+</body>
+</html>
