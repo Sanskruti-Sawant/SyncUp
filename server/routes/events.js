@@ -69,5 +69,10 @@ async function eventRoutes(fastify, opts) {
     await event.save();
     reply.send({ message: 'Report submitted' });
   });
+  // Get events hosted by me
+  fastify.get('/my-hosted', { onRequest: [fastify.authenticate] }, async (req, reply) => {
+    const events = await Event.find({ organizer: req.user.id }).sort({ createdAt: -1 });
+    reply.send({ events });
+  });
 }
 module.exports = eventRoutes;

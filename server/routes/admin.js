@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Company = require('../models/Company');
+const Event = require('../models/Event');
 
 async function adminRoutes(fastify, opts) {
   // Middleware to check if user is an admin
@@ -98,6 +99,40 @@ async function adminRoutes(fastify, opts) {
     await company.save();
     
     reply.send({ success: true, message: 'Company claim rejected.' });
+  });
+
+  /* ── Get Pending Events ── */
+  fastify.get('/pending-events', async (request, reply) => {
+    const events = await Event.find({ status: 'pending' }).populate('organizer', 'name email trustScore');
+    reply.send({ pendingEvents: events });
+  });
+
+  /* ── Approve Event ── */
+  fastify.post('/events/:id/approve', async (request, reply) => {
+    const { id } = request.params;
+    const event = await Event.findById(id);
+    if (!event || event.status !== 'pending') {
+      return reply.code(404).send({ error: 'Pending event not found.' });
+    }
+    event.status = 'approved';
+    event.isVerified = true;
+    event.trustScore = Math.min(event.trustScore + 30, 100);
+    await event.save();
+    reply.send({ success: true, message: 'Event approved successfully.' });
+  });
+
+  /* ── Reject Event ── */
+  fastify.post('/events/:id/reject', async (request, reply) => {
+    const { id } = request.params;
+    const { reason } = request.body || {};
+    const event = await Event.findById(id);
+    if (!event || event.status !== 'pending') {
+      return reply.code(404).send({ error: 'Pending event not found.' });
+    }
+    event.status = 'cancelled';
+    event.reviewNotes = reason || 'Rejected by admin';
+    await event.save();
+    reply.send({ success: true, message: 'Event rejected and cancelled.' });
   });
 }
 

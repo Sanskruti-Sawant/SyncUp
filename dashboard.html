@@ -104,7 +104,66 @@
 
   <!-- EVENTS TAB -->
   <div id="tab-events" class="section-block" style="display:none">
-    <h2>Discover Events</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2>Professional Events & Workshops</h2>
+      <button class="btn btn--gradient" onclick="document.getElementById('host-event-form').style.display='block'">+ Host Event</button>
+    </div>
+
+    <!-- Host Event Form -->
+    <div id="host-event-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid var(--primary);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3>Host a New Event</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('host-event-form').style.display='none'">Cancel</button>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Event Title</label>
+          <input class="form-input" id="event-title" placeholder="e.g. AI Strategy Workshop" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Event Type</label>
+          <select class="form-input" id="event-type">
+            <option value="hackathon">Hackathon</option>
+            <option value="workshop">Workshop</option>
+            <option value="conference">Conference</option>
+            <option value="networking">Networking</option>
+            <option value="hiring">Hiring</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input class="form-input" type="date" id="event-date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ticket Price (₹)</label>
+          <input class="form-input" type="number" id="event-price" value="0" />
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Description</label>
+          <textarea class="post-input" id="event-desc" placeholder="What will attendees learn?" style="min-height:80px"></textarea>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Cancellation Policy</label>
+          <select class="form-input" id="event-policy">
+            <option value="full-refund">Full Refund (Safe for attendees)</option>
+            <option value="partial-refund">Partial Refund (50%)</option>
+            <option value="no-refund">No Refund (High risk)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem; display:flex; gap:1rem; align-items:center;">
+        <button class="btn btn--gradient" onclick="createEvent()">Submit for Approval</button>
+        <p style="font-size:0.8rem; color:var(--on-surface-variant)">Events are held in 'pending' status for admin verification.</p>
+      </div>
+    </div>
+
+    <!-- My Hosted Events Section -->
+    <div id="my-hosted-events-section" style="margin-bottom: 2rem; display:none;">
+      <h3 style="margin-bottom:1rem">Your Hosted Events (Organizer Panel)</h3>
+      <div id="my-events-list" class="dash-grid"></div>
+    </div>
+
+    <h3 style="margin-bottom:1rem">Upcoming Events</h3>
     <div id="events-list" class="dash-grid"></div>
   </div>
 
@@ -265,6 +324,15 @@
         Loading pending company claims...
       </div>
     </div>
+    <div class="dash-card glass-panel" style="margin-top: 2rem;">
+      <div class="dash-card__header">
+        <div class="dash-card__icon" style="background:#4ade80;color:#000"><span class="material-symbols-outlined">event_available</span></div>
+        <div class="dash-card__title">Pending Event Approvals</div>
+      </div>
+      <div id="admin-events-list" class="dash-card__body">
+        Loading pending events...
+      </div>
+    </div>
   </div>
 </div>
 
@@ -326,12 +394,12 @@ function switchTab(tab) {
     event.target.classList.add('active');
   }
   if (tab === 'jobs') loadJobs();
-  if (tab === 'events') loadEvents();
+  if (tab === 'events') { loadEvents(); loadMyHostedEvents(); }
   if (tab === 'companies') loadCompanies();
   if (tab === 'b2b') loadB2B();
   if (tab === 'opportunities') loadInvestments();
   if (tab === 'ai') loadAI();
-  if (tab === 'admin') { loadAdminClaims(); loadAdminCompanyClaims(); }
+  if (tab === 'admin') { loadAdminClaims(); loadAdminCompanyClaims(); loadAdminPendingEvents(); }
 }
 
 async function loadFeed() {
@@ -376,8 +444,145 @@ async function loadEvents() {
   const res = await fetch(API + '/events', { headers });
   const { events } = await res.json();
   document.getElementById('events-list').innerHTML = events.length === 0
-    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No events yet.</p></div>'
-    : events.map(e => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">event</span></div><div class="dash-card__title">${e.title}</div></div><div class="dash-card__body"><p>${e.type} · ${new Date(e.startDate).toLocaleDateString()}</p><p style="margin-top:.5rem">${(e.description||'').slice(0,120)}...</p><p style="margin-top:.5rem;color:var(--primary);font-weight:700">₹${e.ticketPrice||'Free'} · ${e.attendees?.length||0} registered</p><button class="btn btn--glass" style="margin-top:1rem" onclick="registerEvent('${e._id}')">Register</button></div></div>`).join('');
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No upcoming verified events yet.</p></div>'
+    : events.map(e => `
+      <div class="dash-card glass-panel">
+        <div class="dash-card__header">
+          <div class="dash-card__icon"><span class="material-symbols-outlined">event</span></div>
+          <div class="dash-card__title">${e.title} ${e.isVerified?'<span style="color:#4ade80">✓</span>':''}</div>
+        </div>
+        <div class="dash-card__body">
+          <p>${e.type.toUpperCase()} · ${new Date(e.startDate).toLocaleDateString()}</p>
+          <div style="margin: 0.8rem 0; padding: 0.5rem; background: rgba(96,165,250,0.1); border-radius: 8px; font-size: 0.75rem; color: #60a5fa;">
+            <span class="material-symbols-outlined" style="font-size: 0.9rem; vertical-align: middle;">shield_with_heart</span> 
+            SyncEscrow: Payout held until event completion
+          </div>
+          <p style="margin-top:.5rem">${(e.description||'').slice(0,100)}...</p>
+          <p style="margin-top:.5rem;color:var(--primary);font-weight:700">₹${e.ticketPrice||'Free'} · Trust Score: ${e.trustScore}</p>
+          <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+            <button class="btn btn--gradient" style="flex:1" onclick="registerEvent('${e._id}')">Register</button>
+            <button class="btn btn--glass" title="Report Fraud" onclick="reportFraud('${e._id}')"><span class="material-symbols-outlined" style="font-size:1.1rem">flag</span></button>
+          </div>
+        </div>
+      </div>`).join('');
+}
+
+async function createEvent() {
+  const title = document.getElementById('event-title').value.trim();
+  const type = document.getElementById('event-type').value;
+  const startDate = document.getElementById('event-date').value;
+  const ticketPrice = document.getElementById('event-price').value;
+  const description = document.getElementById('event-desc').value.trim();
+  const cancellationPolicy = document.getElementById('event-policy').value;
+
+  if (!title || !startDate) return alert('Title and Date are required');
+
+  const res = await fetch(API + '/events', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ title, type, startDate, ticketPrice, description, cancellationPolicy })
+  });
+
+  if (res.ok) {
+    alert('Event submitted for admin review!');
+    document.getElementById('host-event-form').style.display = 'none';
+    loadMyHostedEvents();
+  } else {
+    const data = await res.json();
+    alert('Error: ' + data.error);
+  }
+}
+
+async function loadMyHostedEvents() {
+  const res = await fetch(API + '/events/my-hosted', { headers });
+  const { events } = await res.json();
+  if (events && events.length > 0) {
+    document.getElementById('my-hosted-events-section').style.display = 'block';
+    document.getElementById('my-events-list').innerHTML = events.map(e => `
+      <div class="dash-card glass-panel" style="border-left: 4px solid ${e.status === 'live' ? '#4ade80' : '#fbbf24'}">
+        <div class="dash-card__header">
+          <div class="dash-card__title">${e.title}</div>
+          <span class="dash-badge ${e.status}">${e.status}</span>
+        </div>
+        <div class="dash-card__body">
+          <p>Escrow Balance: <b>₹${e.escrowBalance || 0}</b></p>
+          <p style="font-size:0.8rem; margin-top:0.4rem">Policy: ${e.cancellationPolicy}</p>
+          <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+            ${e.status === 'approved' || e.status === 'live' ? `
+              <button class="btn btn--gradient" style="font-size:0.8rem" onclick="completeEvent('${e._id}')">Complete & Release</button>
+              <button class="btn btn--glass" style="font-size:0.8rem; color:#ef4444" onclick="cancelEvent('${e._id}')">Cancel</button>
+            ` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('my-hosted-events-section').style.display = 'none';
+  }
+}
+
+async function registerEvent(id) {
+  const res = await fetch(API + '/events/' + id + '/register', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadEvents();
+}
+
+async function reportFraud(id) {
+  const reason = prompt('Reason for fraud report:');
+  if (!reason) return;
+  const res = await fetch(API + '/events/' + id + '/report', { method: 'POST', headers, body: JSON.stringify({ reason }) });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadEvents();
+}
+
+async function completeEvent(id) {
+  if (!confirm('Are you sure the event is finished? This will release the escrow funds to your account.')) return;
+  const res = await fetch(API + '/events/' + id + '/complete', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadMyHostedEvents();
+}
+
+async function cancelEvent(id) {
+  if (!confirm('Cancel event? This will automatically trigger refunds based on your policy and impact your trust score.')) return;
+  const res = await fetch(API + '/events/' + id + '/cancel', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadMyHostedEvents();
+}
+
+async function loadAdminPendingEvents() {
+  const res = await fetch(API + '/admin/pending-events', { headers });
+  const { pendingEvents } = await res.json();
+  document.getElementById('admin-events-list').innerHTML = (pendingEvents||[]).length === 0
+    ? '<p style="color:var(--on-surface-variant)">No pending events for review.</p>'
+    : pendingEvents.map(e => `
+      <div class="dash-card glass-panel" style="margin-bottom:1rem">
+        <div style="display:flex; justify-content:space-between;">
+          <div>
+            <h4 style="margin-bottom:0.4rem">${e.title} (${e.type})</h4>
+            <p style="font-size:0.85rem">Organizer: <b>${e.organizer?.name}</b> (Trust: ${e.organizer?.trustScore})</p>
+            <p style="font-size:0.85rem">Date: ${new Date(e.startDate).toLocaleDateString()} | Price: ₹${e.ticketPrice}</p>
+            <p style="margin-top:0.5rem; font-size:0.85rem">${e.description}</p>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <button class="btn btn--gradient" style="padding:0.4rem 1rem" onclick="approveEvent('${e._id}')">Approve</button>
+            <button class="btn btn--glass" style="padding:0.4rem 1rem; color:#ef4444" onclick="rejectEvent('${e._id}')">Reject</button>
+          </div>
+        </div>
+      </div>`).join('');
+}
+
+async function approveEvent(id) {
+  const res = await fetch(API + '/admin/events/' + id + '/approve', { method: 'POST', headers });
+  if (res.ok) { alert('Event approved.'); loadAdminPendingEvents(); }
+}
+
+async function rejectEvent(id) {
+  const reason = prompt('Reason for rejection:');
+  const res = await fetch(API + '/admin/events/' + id + '/reject', { method: 'POST', headers, body: JSON.stringify({ reason }) });
+  if (res.ok) { alert('Event rejected.'); loadAdminPendingEvents(); }
 }
 
 async function registerEvent(id) {

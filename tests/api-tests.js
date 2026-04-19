@@ -171,27 +171,35 @@ function assert(name, condition, detail) {
   /* ═══════════════════════════════════════════
      PILLAR 7: EVENT DISCOVERY & PARTICIPATION
      MILESTONE 3: Event Authenticity & Escrow
+     - Mandatory Admin Approval
      - Payment escrow
      - Cancellation with refund
      - Fraud reporting
      ═══════════════════════════════════════════ */
-  console.log('\n── 6. Events & Escrow Trust (5 tests) ──');
+  console.log('\n── 6. Events & Escrow Trust (6 tests) ──');
 
   x = await req('POST', '/events', { title: 'Test Hackathon', type: 'hackathon', description: 'Test', startDate: '2025-01-15', ticketPrice: 500, maxAttendees: 100, cancellationPolicy: 'full-refund' }, demoToken);
-  assert('Create event with escrow policy', x.status === 201);
+  assert('Create event (starts as pending)', x.status === 201 && x.event.status === 'pending');
+  const eventId = x.event?._id; 
+
+  x = await req('GET', '/events', null, token);
+  assert('Pending event hidden from public list', !x.events?.find(e => e._id === eventId));
+
+  x = await req('POST', `/admin/events/${eventId}/approve`, {}, demoToken);
+  assert('Admin approves event', x.ok);
 
   x = await req('GET', '/events');
-  assert('List events', x.ok);
-  const eid = x.events?.[0]?._id;
+  assert('List events (now visible)', x.ok && x.events?.some(e => e._id === eventId));
+  const eid = eventId;
 
   if (eid) {
-    x = await req('POST', '/events/' + eid + '/register', {}, demoToken);
+    x = await req('POST', '/events/' + eid + '/register', {}, token);
     assert('Register with escrow payment hold', x.ok && x.ticketId && x.escrowHeld >= 0);
 
-    x = await req('POST', '/events/' + eid + '/register', {}, demoToken);
+    x = await req('POST', '/events/' + eid + '/register', {}, token);
     assert('Reject duplicate registration', x.status === 409);
 
-    x = await req('POST', '/events/' + eid + '/report', { reason: 'Suspicious listing' });
+    x = await req('POST', '/events/' + eid + '/report', { reason: 'Suspicious listing' }, token);
     assert('Submit fraud report', x.ok);
   }
 
