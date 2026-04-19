@@ -233,12 +233,11 @@ async function startVerification() {
 
     // Compute adaptive thresholds from the rolling baseline
     const baseline = earBuffer.reduce((a, b) => a + b, 0) / earBuffer.length;
-    const closedThreshold = baseline * 0.70;  // 70% of baseline = eyes closing
-    const openThreshold   = baseline * 0.82;  // 82% of baseline = eyes reopened
-
-    // After 20s, make it even easier (single blink, wider thresholds)
-    const neededBlinks = elapsed > 20 ? 1 : 2;
-    const effectiveClosed = elapsed > 20 ? baseline * 0.80 : closedThreshold;
+    // Make thresholds much more forgiving
+    const closedThreshold = baseline * 0.85;  // 85% of baseline = eyes closing (15% drop)
+    const openThreshold   = baseline * 0.90;  // 90% of baseline = eyes reopened
+    const neededBlinks = 1; // Only require 1 blink for better UX
+    const effectiveClosed = closedThreshold;
 
     // Update EAR meter color based on state
     if (ear < effectiveClosed) {
@@ -311,16 +310,27 @@ async function submitVerification() {
     });
     const data = await res.json();
     if (res.ok) {
-      statusEl.textContent = '✓ ' + data.message;
-      statusEl.className = 'verify-status success';
       document.getElementById('step3').classList.remove('active');
       document.getElementById('step3').classList.add('done');
       const user = JSON.parse(localStorage.getItem('syncup_user') || '{}');
-      user.isVerified = true;
       user.verificationLevel = data.verificationLevel;
+      
+      if (data.needsNameVerification) {
+        statusEl.textContent = '⚠ Liveness Confirmed';
+        statusEl.className = 'verify-status error';
+        statusEl.style.color = '#fbbf24'; // Warning yellow
+        challengeEl.textContent = data.message;
+        user.isVerified = false;
+        document.getElementById('done-btn').style.display = 'inline-flex';
+        document.getElementById('done-btn').textContent = 'Go to Dashboard to Verify Name';
+      } else {
+        statusEl.textContent = '✓ ' + data.message;
+        statusEl.className = 'verify-status success';
+        user.isVerified = true;
+        document.getElementById('done-btn').style.display = 'inline-flex';
+        challengeEl.textContent = 'Your identity has been verified successfully.';
+      }
       localStorage.setItem('syncup_user', JSON.stringify(user));
-      document.getElementById('done-btn').style.display = 'inline-flex';
-      challengeEl.textContent = 'Your identity has been verified successfully.';
     } else {
       statusEl.textContent = data.error || 'Verification failed';
       statusEl.className = 'verify-status error';

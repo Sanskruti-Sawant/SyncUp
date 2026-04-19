@@ -86,7 +86,7 @@ async function handleLogin(e) {
       body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value })
     });
     const data = await res.json();
-    if (!res.ok) return showAlert(data.error);
+    if (!res.ok) return showAlert(data.message || data.error);
     localStorage.setItem('syncup_token', data.token);
     localStorage.setItem('syncup_user', JSON.stringify(data.user));
     if (!data.user.isVerified) { window.location.href = '/verify'; }
@@ -107,7 +107,7 @@ async function handleRegister(e) {
       })
     });
     const data = await res.json();
-    if (!res.ok) return showAlert(data.error);
+    if (!res.ok) return showAlert(data.message || data.error);
     localStorage.setItem('syncup_token', data.token);
     localStorage.setItem('syncup_user', JSON.stringify(data.user));
     showAlert('Account created! Redirecting to face verification...', 'success');

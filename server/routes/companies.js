@@ -4,7 +4,7 @@ async function companyRoutes(fastify, opts) {
 
   /* ── Create Company ── */
   fastify.post('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
-    const { name, industry, description, website, location, size, founded, servicesOffered, mapPlaceId } = request.body;
+    const { name, industry, description, website, location, size, founded, servicesOffered, mapPlaceId, domainEmail, documents } = request.body;
 
     // Duplicate check via mapPlaceId
     if (mapPlaceId) {
@@ -12,9 +12,19 @@ async function companyRoutes(fastify, opts) {
       if (existing) return reply.code(409).send({ error: 'Company already registered with this location', existingId: existing._id });
     }
 
+    if (!domainEmail || !documents || documents.length === 0) {
+      return reply.code(400).send({ error: 'Domain email and supporting documents are required to verify ownership.' });
+    }
+
     const company = new Company({
       name, owner: request.user.id, industry, description, website,
-      location, size, founded, servicesOffered, mapPlaceId, trustScore: 10
+      location, size, founded, servicesOffered, mapPlaceId, trustScore: 10,
+      isVerified: false,
+      ownershipClaim: {
+        status: 'pending',
+        domainEmail,
+        documents
+      }
     });
     await company.save();
     reply.code(201).send({ company });
@@ -30,7 +40,12 @@ async function companyRoutes(fastify, opts) {
   /* ── Search Companies ── */
   fastify.get('/', async (request, reply) => {
     const { q, industry, page = 1, limit = 20 } = request.query;
-    const filter = {};
+    const filter = {
+      $or: [
+        { isVerified: true },
+        { owner: request.user.id }
+      ]
+    };
     if (q) filter.$text = { $search: q };
     if (industry) filter.industry = industry;
     const companies = await Company.find(filter)

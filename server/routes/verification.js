@@ -27,26 +27,30 @@ async function verificationRoutes(fastify, opts) {
       }
     }
 
-    // Store descriptor and mark verified
     const user = await User.findById(request.user.id);
-    user.faceDescriptor = faceDescriptor;
-    user.isVerified = true;
-    user.livenessProof = true;
-    user.verificationLevel = 'basic';
-    user.trustScore = Math.min(user.trustScore + 30, 100);
-    await user.save();
+    // Check name risk of the registered name
+    const existingUsers = await User.find({ name: new RegExp(`^${user.name}$`, 'i'), _id: { $ne: user._id }, isVerified: true });
+    const riskScore = calculateNameRisk(user.name, user.email, existingUsers);
 
-    // Verify referral chain
-    const referral = await Referral.findOne({ referred: user._id, status: 'pending' });
-    if (referral) {
-      referral.status = 'verified';
-      await referral.save();
-    }
+    user.faceDescriptor = faceDescriptor;
+    user.livenessProof = true;
+    
+    // All users must now go through document verification, regardless of risk score
+    user.isVerified = false;
+    user.verificationLevel = 'none';
+    user.identityClaim = {
+      status: 'pending',
+      documents: [],
+      riskScore
+    };
+
+    await user.save();
 
     reply.send({
       success: true,
-      message: 'Face verification complete. Identity confirmed.',
-      verificationLevel: 'basic',
+      needsNameVerification: true,
+      message: 'Face liveness confirmed. Please upload supporting documents in the Dashboard to complete verification.',
+      verificationLevel: 'none',
       trustScore: user.trustScore
     });
   });
@@ -55,31 +59,45 @@ async function verificationRoutes(fastify, opts) {
   fastify.post('/identity-claim', { onRequest: [fastify.authenticate] }, async (request, reply) => {
     const { claimedName, documents, professionalProof } = request.body;
     const user = await User.findById(request.user.id);
-    if (!user.isVerified) return reply.code(403).send({ error: 'Face verification required first' });
+    if (!user.livenessProof) return reply.code(403).send({ error: 'Face verification required first' });
 
+    // Check for existing users with the same name to prevent impersonation
+    const existingUsers = await User.find({ name: new RegExp(`^${claimedName}$`, 'i'), _id: { $ne: user._id }, isVerified: true });
+    
     // Risk scoring for name claims
-    const riskScore = calculateNameRisk(claimedName);
+    const riskScore = calculateNameRisk(claimedName, user.email, existingUsers);
 
+    if (!documents || documents.length === 0) {
+      return reply.code(400).send({ error: 'Supporting documents are required for all name claims.' });
+    }
+
+    // All claims are now pending manual review
     user.identityClaim = {
-      status: riskScore > 70 ? 'pending' : 'approved',  // High-risk names need manual review
+      status: 'pending',
       documents: documents || [],
       riskScore
     };
-
-    if (riskScore <= 70) {
-      user.verificationLevel = 'identity';
-      user.trustScore = Math.min(user.trustScore + 20, 100);
-    }
 
     await user.save();
 
     reply.send({
       status: user.identityClaim.status,
       riskScore,
-      message: riskScore > 70
-        ? 'Your name claim requires manual review due to high-profile match. Please upload supporting documents.'
-        : 'Identity claim approved. Verification level upgraded.'
+      message: 'Your name claim requires manual review. Please wait for an admin to verify your documents.'
     });
+  });
+
+  /* ── Check Name Risk (Real-time Frontend Feedback) ── */
+  fastify.get('/check-name-risk', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    const { name } = request.query;
+    if (!name) return reply.send({ riskScore: 0 });
+
+    const user = await User.findById(request.user.id);
+    const existingUsers = await User.find({ name: new RegExp(`^${name}$`, 'i'), _id: { $ne: user._id }, isVerified: true });
+    
+    const riskScore = calculateNameRisk(name, user.email, existingUsers);
+    
+    reply.send({ riskScore, requiresDocument: riskScore > 70 });
   });
 
   /* ── Company Ownership Verification ── */
@@ -134,17 +152,37 @@ function cosineSimilarity(a, b) {
 }
 
 /* ── Helper: Name Risk Scoring ── */
-function calculateNameRisk(name) {
+function calculateNameRisk(name, email = '', existingUsers = []) {
   const highProfilePatterns = [
     /\b(ceo|cto|founder|president|minister|chairman)\b/i,
-    /\b(elon|bezos|zuckerberg|nadella|pichai|ambani|tata|adani)\b/i,
-    /\b(modi|trump|gates|musk)\b/i
+    /\b(elon|bezos|zuckerberg|nadella|pichai|ambani|tata|adani|cook|jobs)\b/i,
+    /\b(modi|trump|gates|musk|obama|biden)\b/i
   ];
   let risk = 0;
+  
+  // 1. High Profile Keywords
   for (const pattern of highProfilePatterns) {
     if (pattern.test(name)) risk += 40;
   }
   if (name.length < 3) risk += 20;
+
+  // 2. Profile Authenticity Signals
+  // If the claimed name somewhat matches their registered email domain or handle, reduce risk
+  const emailLocalPart = email.split('@')[0].toLowerCase();
+  const nameLower = name.toLowerCase().replace(/\s+/g, '');
+  
+  if (emailLocalPart.includes(nameLower) || nameLower.includes(emailLocalPart)) {
+    risk = Math.max(0, risk - 15); // Authentic signal
+  } else {
+    risk += 10; // Generic email mismatch
+  }
+
+  // 3. Impersonation Prevention
+  // If another verified user already has this exact name, huge risk increase
+  if (existingUsers.length > 0) {
+    risk += 50; 
+  }
+
   return Math.min(risk, 100);
 }
 

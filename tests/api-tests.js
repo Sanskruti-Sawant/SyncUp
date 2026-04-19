@@ -76,7 +76,7 @@ function assert(name, condition, detail) {
   x = await req('GET', '/referrals/milestones', null, demoToken);
   assert('Milestone targets: 100, 500, 1000', x.ok && x.milestones?.length === 3 && x.milestones[0].target === 100 && x.milestones[2].target === 1000);
 
-  x = await req('GET', '/referrals/leaderboard');
+  x = await req('GET', '/referrals/leaderboard', null, demoToken);
   assert('Referral leaderboard accessible', x.ok && Array.isArray(x.leaderboard));
 
   x = await req('GET', '/referrals/history', null, demoToken);
@@ -113,11 +113,21 @@ function assert(name, condition, detail) {
   console.log('\n── 4. Identity Claim Verification (3 tests) ──');
 
   x = await req('POST', '/verify/identity-claim', { claimedName: 'John Doe', documents: ['passport.pdf'] });
-  assert('Normal name auto-approved', x.ok && x.status === 'approved');
+  assert('Normal name flagged for review (Mandatory Document Upload)', x.ok && x.status === 'pending');
 
   x = await req('POST', '/verify/identity-claim', { claimedName: 'CEO Elon Musk' });
+  assert('High-profile name without documents rejected', x.status === 400);
+
+  x = await req('POST', '/verify/identity-claim', { claimedName: 'CEO Elon Musk', documents: ['proof.pdf'] });
   assert('High-profile name flagged for review', x.ok && x.status === 'pending');
   assert('Risk score > 70 for impersonation attempt', x.riskScore > 70);
+
+  // ADMIN APPROVES THE USER SO THEY CAN ACCESS THE REST OF THE PLATFORM
+  const meRes = await req('GET', '/auth/me'); 
+  const testUserId = meRes.user._id;
+
+  x = await req('POST', `/admin/claims/${testUserId}/approve`, {}, demoToken);
+  assert('Admin approves identity claim, unlocking platform access', x.ok && x.message.includes('approved'));
 
   /* ═══════════════════════════════════════════
      PILLAR 9: COMPANY VERIFICATION
@@ -125,14 +135,25 @@ function assert(name, condition, detail) {
      - Domain email matching
      - Manual review fallback
      ═══════════════════════════════════════════ */
-  console.log('\n── 5. Company Verification & Ownership (6 tests) ──');
+  /* ═══════════════════════════════════════════
+     PILLAR 9: COMPANY VERIFICATION
+     MILESTONE 2: Company Ownership Claim
+     - Mandatory domain email & document verification during creation
+     ═══════════════════════════════════════════ */
+  console.log('\n── 5. Company Verification & Ownership (5 tests) ──');
 
   x = await req('POST', '/companies', { name: 'TestCorp', industry: 'Tech', description: 'Test company', website: 'https://testcorp.dev', location: 'Mumbai' }, demoToken);
-  assert('Create company', x.status === 201);
+  assert('Reject company creation without documents', x.status === 400);
+
+  x = await req('POST', '/companies', { name: 'TestCorp', industry: 'Tech', description: 'Test company', website: 'https://testcorp.dev', location: 'Mumbai', domainEmail: 'admin@testcorp.dev', documents: ['biz.pdf'] }, demoToken);
+  assert('Create company with mandatory documents', x.status === 201 && x.company.ownershipClaim.status === 'pending');
   companyId = x.company?._id;
 
   x = await req('GET', '/companies');
-  assert('List companies', x.ok && x.companies?.length > 0);
+  // Admin is the owner, so they can see it even though isVerified is false. Let's fetch as non-owner.
+  const otherUserReq = await req('GET', '/companies', null, token);
+  const foundOther = otherUserReq.companies?.find(c => c._id === companyId);
+  assert('Unverified company hidden from public list', !foundOther);
 
   x = await req('GET', '/companies/' + companyId);
   assert('Get company by ID', x.ok && x.company);
@@ -140,11 +161,12 @@ function assert(name, condition, detail) {
   x = await req('PUT', '/companies/' + companyId, { description: 'Updated' }, demoToken);
   assert('Update company (owner only)', x.ok);
 
-  x = await req('POST', '/verify/company-ownership', { companyId, domainEmail: 'admin@testcorp.dev' }, demoToken);
-  assert('Auto-approve ownership via domain email match', x.ok && x.domainMatch === true);
+  x = await req('POST', `/admin/companies/${companyId}/approve`, {}, demoToken);
+  assert('Admin manually approves company ownership', x.ok);
 
-  x = await req('POST', '/verify/company-ownership', { companyId, domainEmail: 'random@gmail.com' }, demoToken);
-  assert('Manual review for non-matching domain', x.ok && x.status === 'pending');
+  const verifiedUserReq = await req('GET', '/companies', null, token);
+  const foundVerified = verifiedUserReq.companies?.find(c => c._id === companyId);
+  assert('Verified company becomes visible in public list', !!foundVerified);
 
   /* ═══════════════════════════════════════════
      PILLAR 7: EVENT DISCOVERY & PARTICIPATION

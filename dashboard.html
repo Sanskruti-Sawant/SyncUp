@@ -84,6 +84,7 @@
     <button class="tab-btn" onclick="switchTab('opportunities')">Investments</button>
     <button class="tab-btn" onclick="switchTab('ai')">✨ AI Assistant</button>
     <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
+    <button class="tab-btn" id="admin-tab-btn" style="display:none;background:var(--primary);color:var(--on-primary)" onclick="switchTab('admin')">Admin</button>
   </div>
 
   <!-- FEED TAB -->
@@ -119,7 +120,62 @@
 
   <!-- COMPANIES TAB -->
   <div id="tab-companies" class="section-block" style="display:none">
-    <h2>Companies</h2>
+    
+    <!-- Prominent Add Company Call-To-Action -->
+    <div class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(96,165,250,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(96,165,250,0.3); text-align: center; padding: 2rem;">
+      <div style="font-size: 3rem; color: #60a5fa; margin-bottom: 1rem;"><span class="material-symbols-outlined" style="font-size: 3rem;">business_center</span></div>
+      <h2 style="margin-bottom: 0.5rem;">List Your Company on SyncUp</h2>
+      <p style="color: var(--on-surface-variant); margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Create a verified business profile to unlock the B2B Service Exchange, post experienced jobs, and connect directly with investors. All new companies undergo manual document review.
+      </p>
+      <button class="btn btn--gradient" style="font-size: 1.1rem; padding: 0.8rem 2rem;" onclick="document.getElementById('create-company-form').style.display='block'; this.parentElement.style.display='none';">+ Register New Company</button>
+    </div>
+    
+    <!-- Create Company Form -->
+    <div id="create-company-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid #60a5fa;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3>Register a New Company</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('create-company-form').style.display='none'; document.getElementById('tab-companies').firstElementChild.style.display='block';">Cancel</button>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Company Name</label>
+        <input class="form-input" id="new-company-name" placeholder="e.g. Acme Corp" />
+      </div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Industry</label>
+        <input class="form-input" id="new-company-industry" placeholder="e.g. Technology" />
+      </div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Company Website</label>
+        <input class="form-input" type="url" id="new-company-website" placeholder="https://example.com" />
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Description</label>
+        <textarea class="post-input" id="new-company-desc" placeholder="What does your company do?" style="min-height:80px"></textarea>
+      </div>
+
+      <div style="margin: 2rem 0; padding: 1.5rem; background: rgba(96,165,250,0.05); border-radius: 12px; border: 1px dashed rgba(96,165,250,0.3);">
+        <h4 style="margin-bottom: 1rem; color: #60a5fa;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">verified_user</span>Ownership Verification Requirement</h4>
+        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1rem;">
+          To prevent impersonation and ensure platform trust, all companies are hidden from the public feed until the claimed owner is verified by our Admin team.
+        </p>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Official Domain Email (Required)</label>
+          <input class="form-input" type="email" id="new-company-domain-email" placeholder="you@companydomain.com" />
+        </div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Business Registry / Incorporation Document (Required)</label>
+          <input type="file" class="form-input" id="new-company-doc" style="padding:0.5rem" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;align-items:center;">
+        <button class="btn btn--gradient" id="submit-company-btn" onclick="createCompany()">Submit for Review</button>
+        <span id="create-company-result" style="font-size:0.9rem; font-weight:500;"></span>
+      </div>
+    </div>
+
     <div id="companies-list" class="dash-grid"></div>
   </div>
 
@@ -131,6 +187,26 @@
       <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Bio</label><textarea class="post-input" id="profile-bio" placeholder="Tell professionals about yourself..." style="min-height:100px"></textarea></div>
       <div class="form-group" style="margin-bottom:1rem"><label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Skills (comma-separated)</label><input class="form-input" id="profile-skills" placeholder="JavaScript, Leadership, Product"/></div>
       <button class="btn btn--gradient" onclick="updateProfile()">Save Profile</button>
+    </div>
+
+    <h2 style="margin-top:2rem">Personal Identity Claim Verification</h2>
+    <div class="dash-card glass-panel" style="border-left: 4px solid var(--primary)">
+      <p style="font-size:0.9rem; color:var(--on-surface-variant); margin-bottom:1rem">
+        Claim your professional name. High-profile identities (e.g., CEOs, public figures) are flagged by our risk engine and require manual review with official document upload to prevent impersonation.
+      </p>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Claimed Name</label>
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <input class="form-input" id="identity-claim-name" placeholder="e.g. Elon Musk" oninput="debouncedRiskCheck()"/>
+          <span id="risk-badge" style="display:none; padding:.3rem .6rem; border-radius:.5rem; font-size:.8rem; font-weight:700"></span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem" id="identity-doc-group" style="display:none">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Supporting Document (Required for high-risk claims)</label>
+        <input type="file" class="form-input" id="identity-claim-doc" style="padding:0.5rem"/>
+      </div>
+      <button class="btn btn--gradient" onclick="submitIdentityClaim()">Submit Identity Claim</button>
+      <div id="identity-claim-result" style="margin-top:1rem;font-size:0.9rem;font-weight:600"></div>
     </div>
   </div>
 
@@ -165,6 +241,31 @@
       </div>
     </div>
   </div>
+  <!-- ADMIN TAB -->
+  <div id="tab-admin" class="section-block" style="display:none">
+    <h2>Admin Center</h2>
+    <p style="color:var(--on-surface-variant);margin-bottom:1.5rem">Review and manage pending identity and company claims.</p>
+    
+    <div class="dash-card glass-panel" style="margin-bottom: 2rem;">
+      <div class="dash-card__header">
+        <div class="dash-card__icon" style="background:#fbbf24;color:#000"><span class="material-symbols-outlined">pending_actions</span></div>
+        <div class="dash-card__title">Pending Identity Claims</div>
+      </div>
+      <div id="admin-claims-list" class="dash-card__body">
+        Loading pending claims...
+      </div>
+    </div>
+
+    <div class="dash-card glass-panel">
+      <div class="dash-card__header">
+        <div class="dash-card__icon" style="background:#60a5fa;color:#000"><span class="material-symbols-outlined">domain_verification</span></div>
+        <div class="dash-card__title">Pending Company Ownership Claims</div>
+      </div>
+      <div id="admin-company-claims-list" class="dash-card__body">
+        Loading pending company claims...
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -189,7 +290,31 @@ let currentUser = JSON.parse(localStorage.getItem('syncup_user') || '{}');
     if (currentUser.headline) document.getElementById('profile-headline').value = currentUser.headline;
     if (currentUser.bio) document.getElementById('profile-bio').value = currentUser.bio;
     if (currentUser.skills) document.getElementById('profile-skills').value = currentUser.skills.join(', ');
-    loadFeed(); loadReferrals();
+    
+    document.getElementById('identity-claim-name').value = currentUser.name;
+    debouncedRiskCheck(); // trigger the risk check immediately
+
+    if (currentUser.role === 'admin') {
+      document.getElementById('admin-tab-btn').style.display = 'inline-block';
+    }
+    
+    if (!currentUser.isVerified) {
+      // Platform Lockout for Unverified Users
+      const lockoutMsg = document.createElement('div');
+      lockoutMsg.style = "background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: #ff6b6b; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;";
+      lockoutMsg.innerHTML = "<strong>Platform Access Restricted:</strong> You must upload your supporting documents below and await Admin approval before you can access the SyncUp platform.";
+      document.getElementById('tab-profile').prepend(lockoutMsg);
+      
+      // Hide other tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.textContent !== 'Profile' && btn.textContent !== 'Admin' && btn.id !== 'logout-btn') {
+          btn.style.display = 'none';
+        }
+      });
+      switchTab('profile'); // Force to profile tab
+    } else {
+      loadFeed(); loadReferrals();
+    }
   } catch(e) { console.error(e); }
 })();
 
@@ -197,13 +322,16 @@ function switchTab(tab) {
   document.querySelectorAll('.section-block').forEach(s => s.style.display = 'none');
   document.getElementById('tab-' + tab).style.display = 'block';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (event && event.target && event.target.classList) {
+    event.target.classList.add('active');
+  }
   if (tab === 'jobs') loadJobs();
   if (tab === 'events') loadEvents();
   if (tab === 'companies') loadCompanies();
   if (tab === 'b2b') loadB2B();
   if (tab === 'opportunities') loadInvestments();
   if (tab === 'ai') loadAI();
+  if (tab === 'admin') { loadAdminClaims(); loadAdminCompanyClaims(); }
 }
 
 async function loadFeed() {
@@ -263,7 +391,87 @@ async function loadCompanies() {
   const { companies } = await res.json();
   document.getElementById('companies-list').innerHTML = companies.length === 0
     ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No companies yet.</p></div>'
-    : companies.map(c => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">business</span></div><div class="dash-card__title">${c.name} ${c.isVerified?'<span style="color:#4ade80">✓</span>':''}</div></div><div class="dash-card__body"><p>${c.industry||''} · ${c.size||''}</p><p style="margin-top:.5rem">${(c.description||'').slice(0,120)}...</p></div></div>`).join('');
+    : companies.map(c => {
+        let actionBtn = '';
+        if (c.owner?._id === currentUser.id) {
+          if (c.isVerified) {
+            actionBtn = `<span style="display:inline-block;margin-top:1rem;font-size:0.8rem;color:#4ade80">✓ Verified Owner</span>`;
+          } else {
+            actionBtn = `<span style="display:inline-block;margin-top:1rem;font-size:0.8rem;color:#fbbf24">⚠ Verification Pending Review</span>`;
+          }
+        }
+        return `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">business</span></div><div class="dash-card__title">${c.name} ${c.isVerified?'<span style="color:#4ade80">✓</span>':''}</div></div><div class="dash-card__body"><p>${c.industry||''} · ${c.size||''}</p><p style="margin-top:.5rem">${(c.description||'').slice(0,120)}...</p>${actionBtn}</div></div>`;
+      }).join('');
+}
+
+async function createCompany() {
+  const name = document.getElementById('new-company-name').value.trim();
+  const industry = document.getElementById('new-company-industry').value.trim();
+  const website = document.getElementById('new-company-website').value.trim();
+  const description = document.getElementById('new-company-desc').value.trim();
+  const domainEmail = document.getElementById('new-company-domain-email').value.trim();
+  const fileInput = document.getElementById('new-company-doc');
+  const resultSpan = document.getElementById('create-company-result');
+
+  if (!name || !industry || !domainEmail) {
+    resultSpan.style.color = '#ef4444';
+    resultSpan.textContent = 'Name, Industry, and Domain Email are required';
+    return;
+  }
+
+  if (fileInput.files.length === 0) {
+    resultSpan.style.color = '#ef4444';
+    resultSpan.textContent = 'You must upload a supporting business document.';
+    return;
+  }
+
+  const documents = [fileInput.files[0].name];
+  
+  const btn = document.getElementById('submit-company-btn');
+  const originalText = btn.textContent;
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+  resultSpan.textContent = '';
+
+  try {
+    const res = await fetch(API + '/companies', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name, industry, website, description, size: '1-10', domainEmail, documents })
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      resultSpan.style.color = '#4ade80';
+      resultSpan.textContent = 'Company submitted for manual admin review!';
+      
+      setTimeout(() => {
+        document.getElementById('new-company-name').value = '';
+        document.getElementById('new-company-industry').value = '';
+        document.getElementById('new-company-website').value = '';
+        document.getElementById('new-company-desc').value = '';
+        document.getElementById('new-company-domain-email').value = '';
+        document.getElementById('new-company-doc').value = '';
+        document.getElementById('create-company-form').style.display = 'none';
+        document.getElementById('tab-companies').firstElementChild.style.display = 'block';
+        btn.textContent = originalText;
+        btn.disabled = false;
+        resultSpan.textContent = '';
+        loadCompanies();
+      }, 2500);
+    } else {
+      resultSpan.style.color = '#ef4444';
+      resultSpan.textContent = 'Error: ' + data.error;
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    resultSpan.style.color = '#ef4444';
+    resultSpan.textContent = 'Connection error';
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
 }
 
 async function loadReferrals() {
@@ -299,6 +507,217 @@ async function updateProfile() {
     })
   });
   if (res.ok) alert('Profile updated!');
+}
+
+let riskCheckTimeout;
+async function debouncedRiskCheck() {
+  clearTimeout(riskCheckTimeout);
+  const name = document.getElementById('identity-claim-name').value.trim();
+  const badge = document.getElementById('risk-badge');
+  const docGroup = document.getElementById('identity-doc-group');
+  
+  if (!name) {
+    badge.style.display = 'none';
+    docGroup.style.display = 'none';
+    return;
+  }
+  
+  riskCheckTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(API + '/verify/check-name-risk?name=' + encodeURIComponent(name), { headers });
+      const data = await res.json();
+      
+      badge.style.display = 'inline-block';
+      if (data.riskScore > 70) {
+        badge.textContent = `High Risk (${data.riskScore})`;
+        badge.style.background = 'rgba(239, 68, 68, 0.1)';
+        badge.style.color = '#ef4444';
+      } else if (data.riskScore > 40) {
+        badge.textContent = `Medium Risk (${data.riskScore})`;
+        badge.style.background = 'rgba(251, 191, 36, 0.1)';
+        badge.style.color = '#fbbf24';
+      } else {
+        badge.textContent = `Low Risk (${data.riskScore})`;
+        badge.style.background = 'rgba(74, 222, 128, 0.1)';
+        badge.style.color = '#4ade80';
+      }
+      // Document upload is now mandatory for ALL claims, regardless of risk
+      docGroup.style.display = 'block';
+    } catch(e) {}
+  }, 500);
+}
+
+async function submitIdentityClaim() {
+  const claimedName = document.getElementById('identity-claim-name').value.trim();
+  const fileInput = document.getElementById('identity-claim-doc');
+  const resultDiv = document.getElementById('identity-claim-result');
+  
+  if (!claimedName) return alert('Please enter a name to claim');
+  
+  resultDiv.innerHTML = '<span style="color:var(--primary)">Processing claim...</span>';
+  
+  // In a real app, we would upload the file to S3/Cloud Storage and get a URL.
+  // Here we simulate the document upload.
+  const documents = fileInput.files.length > 0 ? [fileInput.files[0].name] : [];
+  
+  try {
+    const res = await fetch(API + '/verify/identity-claim', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ claimedName, documents })
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      if (data.status === 'pending') {
+        resultDiv.innerHTML = `<span style="color:#fbbf24">⚠️ Manual Review Required (Risk Score: ${data.riskScore}/100).</span><br/>${data.message}`;
+      } else {
+        resultDiv.innerHTML = `<span style="color:#4ade80">✓ Claim Approved (Risk Score: ${data.riskScore}/100).</span><br/>${data.message}`;
+        currentUser.name = claimedName;
+        document.getElementById('welcome-name').textContent = `Welcome, ${currentUser.name}`;
+      }
+    } else {
+      resultDiv.innerHTML = `<span style="color:#ef4444">Error: ${data.error}</span>`;
+    }
+  } catch(e) {
+    resultDiv.innerHTML = `<span style="color:#ef4444">Connection error.</span>`;
+  }
+}
+
+async function loadAdminClaims() {
+  try {
+    const res = await fetch(API + '/admin/pending-claims', { headers });
+    const data = await res.json();
+    
+    const list = document.getElementById('admin-claims-list');
+    if (!data.pendingClaims || data.pendingClaims.length === 0) {
+      list.innerHTML = '<p>No pending claims to review.</p>';
+      return;
+    }
+    
+    list.innerHTML = data.pendingClaims.map(u => `
+      <div style="padding:1rem; border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; margin-bottom:1rem; background:rgba(0,0,0,0.2)">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start">
+          <div>
+            <h4 style="margin-bottom:0.25rem">${u.name}</h4>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Email: ${u.email}</p>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Trust Score: ${u.trustScore}</p>
+            <div style="margin-top:0.5rem">
+              <p style="font-size:0.85rem; font-weight:600">Uploaded Documents:</p>
+              ${u.identityClaim?.documents?.map(d => `<span style="display:inline-block; padding:0.2rem 0.5rem; background:rgba(255,255,255,0.1); border-radius:0.25rem; font-size:0.75rem; margin-top:0.25rem; margin-right:0.5rem">${d}</span>`).join('') || '<span style="font-size:0.8rem;color:#ef4444">None provided</span>'}
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem">
+            <button class="btn btn--glass" style="color:#4ade80; border-color:rgba(74,222,128,0.3)" onclick="approveClaim('${u._id}')">Approve</button>
+            <button class="btn btn--glass" style="color:#ef4444; border-color:rgba(239,68,68,0.3)" onclick="rejectClaim('${u._id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('admin-claims-list').innerHTML = '<p style="color:#ef4444">Failed to load claims.</p>';
+  }
+}
+
+async function approveClaim(userId) {
+  try {
+    const res = await fetch(API + '/admin/claims/' + userId + '/approve', { method: 'POST', headers });
+    if (res.ok) {
+      alert('Claim approved successfully.');
+      loadAdminClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function rejectClaim(userId) {
+  const reason = prompt('Reason for rejection:');
+  if (reason === null) return;
+  try {
+    const res = await fetch(API + '/admin/claims/' + userId + '/reject', { 
+      method: 'POST', 
+      headers,
+      body: JSON.stringify({ reason: reason || 'Rejected by admin' })
+    });
+    if (res.ok) {
+      alert('Claim rejected.');
+      loadAdminClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function loadAdminCompanyClaims() {
+  try {
+    const res = await fetch(API + '/admin/pending-company-claims', { headers });
+    const data = await res.json();
+    
+    const list = document.getElementById('admin-company-claims-list');
+    if (!data.pendingCompanyClaims || data.pendingCompanyClaims.length === 0) {
+      list.innerHTML = '<p>No pending company claims to review.</p>';
+      return;
+    }
+    
+    list.innerHTML = data.pendingCompanyClaims.map(c => `
+      <div style="padding:1rem; border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; margin-bottom:1rem; background:rgba(0,0,0,0.2)">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start">
+          <div>
+            <h4 style="margin-bottom:0.25rem">${c.name}</h4>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Website: ${c.website || 'N/A'}</p>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Claimed By: ${c.owner?.name} (${c.owner?.email})</p>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Domain Email: ${c.ownershipClaim?.domainEmail}</p>
+            <div style="margin-top:0.5rem">
+              <p style="font-size:0.85rem; font-weight:600">Uploaded Documents:</p>
+              ${c.ownershipClaim?.documents?.map(d => `<span style="display:inline-block; padding:0.2rem 0.5rem; background:rgba(255,255,255,0.1); border-radius:0.25rem; font-size:0.75rem; margin-top:0.25rem; margin-right:0.5rem">${d}</span>`).join('') || '<span style="font-size:0.8rem;color:#ef4444">None provided</span>'}
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem">
+            <button class="btn btn--glass" style="color:#4ade80; border-color:rgba(74,222,128,0.3)" onclick="approveCompanyClaim('${c._id}')">Approve</button>
+            <button class="btn btn--glass" style="color:#ef4444; border-color:rgba(239,68,68,0.3)" onclick="rejectCompanyClaim('${c._id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('admin-company-claims-list').innerHTML = '<p style="color:#ef4444">Failed to load company claims.</p>';
+  }
+}
+
+async function approveCompanyClaim(companyId) {
+  try {
+    const res = await fetch(API + '/admin/companies/' + companyId + '/approve', { method: 'POST', headers });
+    if (res.ok) {
+      alert('Company claim approved successfully.');
+      loadAdminCompanyClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function rejectCompanyClaim(companyId) {
+  const reason = prompt('Reason for rejection:');
+  if (reason === null) return;
+  try {
+    const res = await fetch(API + '/admin/companies/' + companyId + '/reject', { 
+      method: 'POST', 
+      headers,
+      body: JSON.stringify({ reason: reason || 'Rejected by admin' })
+    });
+    if (res.ok) {
+      alert('Company claim rejected.');
+      loadAdminCompanyClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
 }
 
 async function loadB2B() {
@@ -347,5 +766,26 @@ async function loadAI() {
 
 function logout() { localStorage.removeItem('syncup_token'); localStorage.removeItem('syncup_user'); window.location.href = '/login'; }
 </script>
+<!-- Company Verification Modal -->
+<div id="company-verify-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(5px)">
+  <div class="dash-card glass-panel" style="width:100%;max-width:500px;padding:2rem;position:relative">
+    <button class="btn btn--glass" style="position:absolute;top:1rem;right:1rem;padding:0.5rem" onclick="hideCompanyVerification()">✕</button>
+    <h2 style="margin-bottom:1rem">Verify Company Ownership</h2>
+    <p style="font-size:0.9rem;color:var(--on-surface-variant);margin-bottom:1.5rem">
+      To verify you own <strong id="company-verify-name" style="color:var(--primary)"></strong> (Website: <span id="company-verify-website"></span>), please provide your official domain email. If it doesn't match the company website, you must upload business registry documents for manual admin review.
+    </p>
+    <input type="hidden" id="company-verify-id" />
+    <div class="form-group" style="margin-bottom:1.5rem">
+      <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.5rem">Official Domain Email</label>
+      <input type="email" class="form-input" id="company-verify-email" placeholder="you@companydomain.com" />
+    </div>
+    <div class="form-group" style="margin-bottom:1.5rem">
+      <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.5rem">Supporting Documents (Optional if domain matches)</label>
+      <input type="file" class="form-input" id="company-verify-doc" style="padding:0.5rem" />
+    </div>
+    <button class="btn btn--gradient btn--full" onclick="submitCompanyVerification()">Submit Verification</button>
+    <div id="company-verify-result" style="margin-top:1rem;font-weight:600;font-size:0.9rem"></div>
+  </div>
+</div>
 </body>
 </html>

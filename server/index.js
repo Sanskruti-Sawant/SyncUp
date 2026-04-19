@@ -21,25 +21,44 @@ async function main() {
     } catch (e) { done(e, undefined); }
   });
 
-  /* ── Auth Decorator ── */
+  /* ── Auth Decorators ── */
   fastify.decorate('authenticate', async function (request, reply) {
     try { await request.jwtVerify(); }
     catch (err) { reply.code(401).send({ error: 'Unauthorized' }); }
+  });
+
+  fastify.decorate('requireVerified', async function (request, reply) {
+    try {
+      await request.jwtVerify();
+      const User = require('./models/User');
+      const user = await User.findById(request.user.id);
+      if (!user || !user.isVerified) {
+        reply.code(403).send({ error: 'Account not verified. Please upload documents and await admin approval.' });
+      }
+    } catch (err) {
+      reply.code(401).send({ error: 'Unauthorized' });
+    }
   });
 
   /* ── API Routes ── */
   fastify.register(require('./routes/auth'), { prefix: '/api/auth' });
   fastify.register(require('./routes/users'), { prefix: '/api/users' });
   fastify.register(require('./routes/verification'), { prefix: '/api/verify' });
-  fastify.register(require('./routes/companies'), { prefix: '/api/companies' });
-  fastify.register(require('./routes/events'), { prefix: '/api/events' });
-  fastify.register(require('./routes/jobs'), { prefix: '/api/jobs' });
-  fastify.register(require('./routes/posts'), { prefix: '/api/posts' });
-  fastify.register(require('./routes/campaigns'), { prefix: '/api/campaigns' });
-  fastify.register(require('./routes/referrals'), { prefix: '/api/referrals' });
-  fastify.register(require('./routes/b2b'), { prefix: '/api/b2b' });
-  fastify.register(require('./routes/ai'), { prefix: '/api/ai' });
-  fastify.register(require('./routes/investment'), { prefix: '/api/investment' });
+  fastify.register(require('./routes/admin'), { prefix: '/api/admin' });
+
+  // Core platform routes - locked behind strict verification
+  fastify.register(async (childServer) => {
+    childServer.addHook('onRequest', childServer.requireVerified);
+    childServer.register(require('./routes/companies'), { prefix: '/companies' });
+    childServer.register(require('./routes/events'), { prefix: '/events' });
+    childServer.register(require('./routes/jobs'), { prefix: '/jobs' });
+    childServer.register(require('./routes/posts'), { prefix: '/posts' });
+    childServer.register(require('./routes/campaigns'), { prefix: '/campaigns' });
+    childServer.register(require('./routes/referrals'), { prefix: '/referrals' });
+    childServer.register(require('./routes/b2b'), { prefix: '/b2b' });
+    childServer.register(require('./routes/ai'), { prefix: '/ai' });
+    childServer.register(require('./routes/investment'), { prefix: '/investment' });
+  }, { prefix: '/api' });
 
   /* ── HTML page routes ── */
   const sendHTML = (file) => (req, reply) => {
@@ -115,7 +134,7 @@ async function seedDemoData(fastify) {
 
   const hash = await bcrypt.hash('Demo1234!', 12);
   const users = await User.insertMany([
-    { name: 'Arjun Mehta', email: 'arjun@demo.com', passwordHash: hash, referralCode: 'SU-ARJUN001', isVerified: true, verificationLevel: 'full', trustScore: 85, headline: 'CEO & Founder at TechNexus', role: 'investor', skills: ['Leadership', 'Strategy', 'AI'] },
+    { name: 'Arjun Mehta', email: 'arjun@demo.com', passwordHash: hash, referralCode: 'SU-ARJUN001', isVerified: true, verificationLevel: 'full', trustScore: 85, headline: 'CEO & Founder at TechNexus', role: 'admin', skills: ['Leadership', 'Strategy', 'AI'] },
     { name: 'Priya Sharma', email: 'priya@demo.com', passwordHash: hash, referralCode: 'SU-PRIYA002', isVerified: true, verificationLevel: 'identity', trustScore: 72, headline: 'Senior Engineer at CloudScale', role: 'professional', skills: ['Node.js', 'React', 'MongoDB'] },
     { name: 'Vikram Desai', email: 'vikram@demo.com', passwordHash: hash, referralCode: 'SU-VIKRM003', isVerified: true, verificationLevel: 'basic', trustScore: 55, headline: 'Product Manager at FinEdge', role: 'recruiter', skills: ['Product', 'Growth', 'Analytics'] },
   ]);
